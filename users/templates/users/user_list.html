@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Encontrar Usuários" %}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="card mb-6">
+        <h1 class="text-2xl font-bold text-gray-900 mb-6">{% trans "Encontrar Usuários" %}</h1>
+        
+        <!-- Formulário de Busca -->
+        <form method="GET" class="mb-6">
+            <div class="flex space-x-4">
+                <div class="flex-1">
+                    <input type="search" 
+                           name="q" 
+                           value="{{ search_query }}"
+                           class="input-field"
+                           placeholder="{% trans 'Buscar por nome ou username...' %}">
+                </div>
+                <button type="submit" class="btn-primary">
+                    {% trans "Buscar" %}
+                </button>
+            </div>
+        </form>
+
+        <!-- Lista de Usuários -->
+        <div class="space-y-4">
+            {% for user_item in users %}
+            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div class="flex items-center space-x-3">
+                    {% if user_item.avatar %}
+                        <img src="{{ user_item.avatar.url }}" 
+                             alt="{{ user_item.username }}"
+                             class="w-10 h-10 rounded-full object-cover">
+                    {% else %}
+                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                            <span class="text-blue-600 font-medium">
+                                {{ user_item.username|make_list|first|upper }}
+                            </span>
+                        </div>
+                    {% endif %}
+                    
+                    <div>
+                        <a href="{% url 'users:profile' user_item.username %}" 
+                           class="text-sm font-medium text-gray-900 hover:text-blue-600">
+                            {{ user_item.username }}
+                        </a>
+                        {% if user_item.first_name or user_item.last_name %}
+                            <p class="text-sm text-gray-500">
+                                {{ user_item.first_name }} {{ user_item.last_name }}
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div>
+                    <a href="{% url 'users:profile' user_item.username %}" 
+                       class="btn-secondary text-sm">
+                        {% trans "Ver Perfil" %}
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-8">
+                {% if search_query %}
+                    <p class="text-gray-500">{% trans "Nenhum usuário encontrado para sua busca." %}</p>
+                {% else %}
+                    <p class="text-gray-500">{% trans "Nenhum usuário disponível." %}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

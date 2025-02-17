@@ -1,0 +1,154 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NBSocial - {% block title %}{% endblock %}</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#1e40af',
+                        'secondary': '#3b82f6',
+                        'accent': '#60a5fa',
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer components {
+            .btn-primary {
+                @apply py-2 px-4 bg-primary text-white font-semibold rounded-lg shadow-md hover:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75;
+            }
+            
+            .btn-secondary {
+                @apply py-2 px-4 bg-secondary text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75;
+            }
+            
+            .btn-danger {
+                @apply py-2 px-4 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-75;
+            }
+            
+            .input-field {
+                @apply mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50;
+            }
+            
+            .card {
+                @apply bg-white rounded-lg shadow-md p-6 mb-4;
+            }
+            
+            .nav-link {
+                @apply text-gray-600 hover:text-primary px-3 py-2 rounded-md text-sm font-medium;
+            }
+            
+            .nav-link-active {
+                @apply text-primary bg-blue-50;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="{% url 'core:home' %}" class="text-2xl font-bold text-primary">NBSocial</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'core:explore' %}" class="nav-link">Explorar</a>
+                        <a href="{% url 'posts:create' %}" class="btn-primary">Nova Publicação</a>
+                    {% else %}
+                        <a href="{% url 'account_login' %}" class="nav-link">Entrar</a>
+                        <a href="{% url 'account_signup' %}" class="btn-primary">Registrar</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto py-6 px-4">
+        {% if messages %}
+        <div class="mb-8">
+            {% for message in messages %}
+            <div class="rounded-md p-4 {% if message.tags == 'error' %}bg-red-50 text-red-700{% else %}bg-green-50 text-green-700{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <!-- Conteúdo principal -->
+            <div class="lg:col-span-3">
+                {% block content %}{% endblock %}
+            </div>
+
+            <!-- Sidebar direita -->
+            <div class="hidden lg:block lg:col-span-1">
+                <div class="sticky top-4">
+                    <!-- Perfil do usuário -->
+                    {% if user.is_authenticated %}
+                    <div class="bg-white rounded-lg shadow p-4 mb-6">
+                        <div class="flex items-center space-x-3">
+                            {% if user.avatar %}
+                                <img class="h-12 w-12 rounded-full object-cover" 
+                                     src="{{ user.avatar.url }}" 
+                                     alt="{{ user.username }}">
+                            {% else %}
+                                <div class="h-12 w-12 rounded-full bg-primary flex items-center justify-center text-white text-xl font-bold">
+                                    {{ user.username.0|upper }}
+                                </div>
+                            {% endif %}
+                            <div>
+                                <h3 class="font-medium">{{ user.username }}</h3>
+                                <a href="{% url 'users:profile' user.username %}" class="text-sm text-gray-500 hover:text-primary">Ver perfil</a>
+                            </div>
+                        </div>
+                        
+                        <!-- Links de navegação -->
+                        <div class="mt-6 space-y-2">
+                            <a href="{% url 'core:home' %}" class="nav-link block {% if request.resolver_match.view_name == 'core:home' %}nav-link-active{% endif %}">
+                                <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                                </svg>
+                                Início
+                            </a>
+                            <a href="{% url 'users:find_users' %}" class="nav-link block {% if request.resolver_match.view_name == 'users:find_users' %}nav-link-active{% endif %}">
+                                <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                </svg>
+                                Encontrar Pessoas
+                            </a>
+                            <a href="{% url 'account_logout' %}" class="nav-link block text-red-600 hover:text-red-800 hover:bg-red-50">
+                                <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                </svg>
+                                Sair
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Hashtags em tendência -->
+                    {% include "posts/trending_hashtags.html" %}
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-white mt-12">
+        <div class="max-w-7xl mx-auto py-12 px-4">
+            <p class="text-center text-gray-500">&copy; {% now "Y" %} NBSocial</p>
+        </div>
+    </footer>
+    {% block extra_js %}{% endblock %}
+    <script src="{% static 'posts/js/post_detail.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Seguindo" %} - {{ profile_user.username }}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="card">
+        <div class="flex items-center mb-6">
+            <a href="{% url 'users:profile' profile_user.username %}" class="flex items-center hover:text-blue-600">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+                <span>{% trans "Voltar ao perfil" %}</span>
+            </a>
+        </div>
+
+        <h1 class="text-2xl font-bold text-gray-900 mb-6">
+            {% trans "Usuários que" %} {{ profile_user.username }} {% trans "segue" %}
+        </h1>
+
+        <div class="space-y-4">
+            {% for following in following %}
+            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div class="flex items-center space-x-3">
+                    {% if following.following_user.avatar %}
+                        <img src="{{ following.following_user.avatar.url }}" 
+                             alt="{{ following.following_user.username }}"
+                             class="w-10 h-10 rounded-full object-cover">
+                    {% else %}
+                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                            <span class="text-blue-600 font-medium">
+                                {{ following.following_user.username|make_list|first|upper }}
+                            </span>
+                        </div>
+                    {% endif %}
+                    
+                    <div>
+                        <a href="{% url 'users:profile' following.following_user.username %}" 
+                           class="text-sm font-medium text-gray-900 hover:text-blue-600">
+                            {{ following.following_user.username }}
+                        </a>
+                        {% if following.following_user.first_name or following.following_user.last_name %}
+                            <p class="text-sm text-gray-500">
+                                {{ following.following_user.first_name }} {{ following.following_user.last_name }}
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div>
+                    <a href="{% url 'users:profile' following.following_user.username %}" 
+                       class="btn-secondary text-sm">
+                        {% trans "Ver Perfil" %}
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-8">
+                <p class="text-gray-500">{% trans "Não está seguindo ninguém ainda." %}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Excluir Publicação" %}{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+    <div class="card">
+        <h1 class="text-2xl font-bold text-gray-900 mb-6">{% trans "Excluir Publicação" %}</h1>
+        
+        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-yellow-700">
+                        {% trans "Tem certeza que deseja excluir esta publicação? Esta ação não pode ser desfeita." %}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preview do Post -->
+        <div class="bg-gray-50 rounded-lg p-4 mb-6">
+            <div class="flex items-center mb-4">
+                <img class="h-8 w-8 rounded-full" src="{{ post.author.profile.avatar.url|default:'/static/images/default-avatar.png' }}" alt="{{ post.author.username }}">
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-gray-900">{{ post.author.username }}</p>
+                    <p class="text-xs text-gray-500">{{ post.created_at|date:"d/m/Y H:i" }}</p>
+                </div>
+            </div>
+            <p class="text-sm text-gray-700">{{ post.content|truncatechars:150 }}</p>
+            {% if post.image %}
+            <img src="{{ post.image.url }}" alt="{% trans 'Imagem da publicação' %}" class="mt-2 h-32 w-auto rounded">
+            {% endif %}
+        </div>
+
+        <form method="POST" class="flex justify-end space-x-4">
+            {% csrf_token %}
+            <a href="{% url 'posts:detail' post.pk %}" class="btn-secondary">{% trans "Cancelar" %}</a>
+            <button type="submit" class="btn-danger">{% trans "Excluir" %}</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% load i18n %}
+
+<div class="bg-white rounded-lg shadow p-4 mb-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">{% trans "Tendências" %}</h2>
+    {% if trending_hashtags %}
+        <div class="space-y-3">
+            {% for hashtag in trending_hashtags %}
+            <a href="{% url 'posts:hashtag_posts' hashtag.name %}" class="block">
+                <div class="group">
+                    <p class="text-blue-600 font-medium group-hover:text-blue-800">{{ hashtag }}</p>
+                    <p class="text-sm text-gray-500">{{ hashtag.total_posts }} {% trans "publicações" %}</p>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-gray-500 text-sm">{% trans "Nenhuma hashtag em tendência no momento." %}</p>
+    {% endif %}
+</div>

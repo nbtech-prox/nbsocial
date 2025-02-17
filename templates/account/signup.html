@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+
+{% block title %}{% trans "Criar Conta" %}{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+    <div class="card">
+        <h1 class="text-2xl font-bold text-gray-900 mb-6">{% trans "Criar Conta" %}</h1>
+
+        <form class="signup" id="signup_form" method="post" action="{% url 'account_signup' %}">
+            {% csrf_token %}
+            
+            {% if form.errors %}
+                <div class="rounded-md bg-red-50 p-4 mb-4">
+                    <div class="text-sm text-red-700">
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        {% endfor %}
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="space-y-4">
+                <div>
+                    <label for="id_email" class="block text-sm font-medium text-gray-700">{% trans "E-mail" %}</label>
+                    <input type="email" name="email" id="id_email" class="input-field" required>
+                </div>
+
+                <div>
+                    <label for="id_username" class="block text-sm font-medium text-gray-700">{% trans "Nome de usuário" %}</label>
+                    <input type="text" name="username" id="id_username" class="input-field" required>
+                </div>
+
+                <div>
+                    <label for="id_password1" class="block text-sm font-medium text-gray-700">{% trans "Senha" %}</label>
+                    <input type="password" name="password1" id="id_password1" class="input-field" required>
+                    <p class="mt-1 text-sm text-gray-500">{% trans "Mínimo de 8 caracteres" %}</p>
+                </div>
+
+                <div>
+                    <label for="id_password2" class="block text-sm font-medium text-gray-700">{% trans "Confirmar senha" %}</label>
+                    <input type="password" name="password2" id="id_password2" class="input-field" required>
+                </div>
+            </div>
+
+            {% if redirect_field_value %}
+                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+            {% endif %}
+
+            <div class="mt-6 space-y-4">
+                <button type="submit" class="w-full btn-primary">{% trans "Criar Conta" %}</button>
+                
+                <p class="text-sm text-center text-gray-600">
+                    {% trans "Já tem uma conta?" %}
+                    <a href="{{ login_url }}" class="text-primary hover:text-blue-800 font-medium">
+                        {% trans "Entrar" %}
+                    </a>
+                </p>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

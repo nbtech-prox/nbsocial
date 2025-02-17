@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% block form_title %}{% endblock %}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="card">
+        <h1 class="text-2xl font-bold text-gray-900 mb-6">{% block form_heading %}{% endblock %}</h1>
+
+        <form method="POST" enctype="multipart/form-data" class="space-y-6">
+            {% csrf_token %}
+            
+            {% if form.errors %}
+                <div class="rounded-md bg-red-50 p-4">
+                    <div class="text-sm text-red-700">
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <div>
+                <div class="flex space-x-3">
+                    <!-- Avatar do usuário -->
+                    {% if user.avatar %}
+                        <img src="{{ user.avatar.url }}" 
+                             alt="{{ user.username }}"
+                             class="w-10 h-10 rounded-full object-cover flex-shrink-0">
+                    {% else %}
+                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                            <span class="text-blue-600 font-medium">
+                                {{ user.username|make_list|first|upper }}
+                            </span>
+                        </div>
+                    {% endif %}
+
+                    <!-- Campo de conteúdo -->
+                    <div class="flex-1">
+                        <label for="id_content" class="block text-sm font-medium text-gray-700">{% trans "O que você está pensando?" %}</label>
+                        <textarea name="content" 
+                                  id="id_content" 
+                                  rows="4" 
+                                  class="input-field" 
+                                  required
+                                  placeholder="{% trans 'Compartilhe seus pensamentos...' %}">{{ form.content.value|default:'' }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label for="id_image" class="block text-sm font-medium text-gray-700">{% trans "Imagem (opcional)" %}</label>
+                <input type="file" name="image" id="id_image" accept="image/*"
+                    class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4
+                    file:rounded-full file:border-0 file:text-sm file:font-semibold
+                    file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                {% if form.instance.image %}
+                    <div class="mt-2">
+                        <img src="{{ form.instance.image.url }}" alt="{% trans 'Imagem atual' %}" class="h-32 w-auto">
+                        <label class="mt-1 flex items-center">
+                            <input type="checkbox" name="image-clear" id="image-clear" class="mr-2">
+                            {% trans "Remover imagem" %}
+                        </label>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="flex justify-end space-x-4">
+                <a href="{% block cancel_url %}{% endblock %}" class="btn-secondary">{% trans "Cancelar" %}</a>
+                <button type="submit" class="btn-primary">{% block submit_button %}{% endblock %}</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

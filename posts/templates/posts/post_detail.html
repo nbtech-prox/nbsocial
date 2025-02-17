@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ post.author.username }} - {% trans "Publicação" %}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="card mb-8" data-post-id="{{ post.pk }}">
+        <!-- Cabeçalho do Post -->
+        <div class="flex items-center mb-4">
+            {% if post.author.avatar %}
+                <img class="h-10 w-10 rounded-full object-cover" 
+                     src="{{ post.author.avatar.url }}"
+                     alt="{{ post.author.username }}">
+            {% else %}
+                <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                    <span class="text-blue-600 font-medium">
+                        {{ post.author.username|make_list|first|upper }}
+                    </span>
+                </div>
+            {% endif %}
+            <div class="ml-3">
+                <p class="text-sm font-medium text-gray-900">{{ post.author.username }}</p>
+                <p class="text-xs text-gray-500">{{ post.created_at|date:"d/m/Y H:i" }}</p>
+            </div>
+            {% if user == post.author %}
+            <div class="ml-auto">
+                <a href="{% url 'posts:edit_post' post.pk %}" class="text-sm text-blue-600 hover:text-blue-800">{% trans "Editar" %}</a>
+                <a href="{% url 'posts:delete_post' post.pk %}" class="ml-3 text-sm text-red-600 hover:text-red-800">{% trans "Excluir" %}</a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Conteúdo do Post -->
+        <p class="text-gray-900 mb-4">{{ post.content }}</p>
+        {% if post.image %}
+        <img src="{{ post.image.url }}" alt="{% trans 'Imagem da publicação' %}" class="rounded-lg mb-4">
+        {% endif %}
+
+        <!-- Ações do Post -->
+        <div class="flex items-center justify-between border-t border-gray-200 pt-4">
+            <div class="flex space-x-4">
+                <button class="like-button flex items-center space-x-1 text-gray-500 hover:text-blue-600" data-post-id="{{ post.pk }}">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"></path>
+                    </svg>
+                    <span class="likes-count">{{ post.likes.count }}</span>
+                </button>
+                <button class="comment-button flex items-center space-x-1 text-gray-500 hover:text-blue-600">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                    </svg>
+                    <span class="comments-count">{{ post.comments.count }}</span>
+                </button>
+            </div>
+            <button class="report-button text-gray-500 hover:text-red-600">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Seção de Comentários -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">{% trans "Comentários" %}</h2>
+        
+        <!-- Formulário de Comentário -->
+        <form method="POST" class="mb-6">
+            {% csrf_token %}
+            <div class="mb-4">
+                <label for="id_content" class="sr-only">{% trans "Seu comentário" %}</label>
+                {{ form.content }}
+            </div>
+            <button type="submit" class="btn-primary">{% trans "Comentar" %}</button>
+        </form>
+
+        <!-- Lista de Comentários -->
+        <div class="space-y-4">
+            {% for comment in comments %}
+            <div class="flex space-x-3">
+                {% if comment.author.avatar %}
+                    <img class="h-8 w-8 rounded-full object-cover" 
+                         src="{{ comment.author.avatar.url }}"
+                         alt="{{ comment.author.username }}">
+                {% else %}
+                    <div class="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+                        <span class="text-blue-600 font-medium">
+                            {{ comment.author.username|make_list|first|upper }}
+                        </span>
+                    </div>
+                {% endif %}
+                <div class="flex-1">
+                    <div class="bg-gray-50 rounded-lg px-4 py-2">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-sm font-medium text-gray-900">{{ comment.author.username }}</h3>
+                            <p class="text-xs text-gray-500">{{ comment.created_at|date:"d/m/Y H:i" }}</p>
+                        </div>
+                        <p class="text-sm text-gray-700">{{ comment.content }}</p>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-gray-500 text-center py-4">{% trans "Nenhum comentário ainda. Seja o primeiro a comentar!" %}</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

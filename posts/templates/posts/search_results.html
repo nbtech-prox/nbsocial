@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Resultados da pesquisa" %} - {{ query }}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <!-- Formulário de Pesquisa -->
+    <form method="get" action="{% url 'posts:search' %}" class="mb-8">
+        <div class="flex gap-2">
+            <input type="text" name="q" value="{{ query }}" placeholder="{% trans 'Pesquisar posts, hashtags ou usuários...' %}"
+                   class="flex-1 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                {% trans "Pesquisar" %}
+            </button>
+        </div>
+    </form>
+
+    {% if query %}
+        <!-- Resultados de Hashtags -->
+        {% if hashtags %}
+        <section class="mb-8">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">{% trans "Hashtags" %}</h2>
+            <div class="grid grid-cols-2 gap-4">
+                {% for hashtag in hashtags %}
+                <a href="{% url 'posts:hashtag_posts' hashtag.name %}" class="block p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow">
+                    <p class="text-blue-600 font-medium">{{ hashtag }}</p>
+                    <p class="text-sm text-gray-500">{{ hashtag.post_count }} {% trans "publicações" %}</p>
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Resultados de Usuários -->
+        {% if users %}
+        <section class="mb-8">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">{% trans "Usuários" %}</h2>
+            <div class="grid grid-cols-2 gap-4">
+                {% for user_result in users %}
+                <a href="{% url 'users:profile' user_result.username %}" class="block p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow">
+                    <div class="flex items-center">
+                        <img class="h-10 w-10 rounded-full" 
+                             src="{% if user_result.profile.avatar %}{{ user_result.profile.avatar.url }}{% else %}https://ui-avatars.com/api/?name={{ user_result.username|urlencode }}&background=3b82f6&color=ffffff{% endif %}"
+                             alt="{{ user_result.username }}">
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-gray-900">{{ user_result.username }}</p>
+                            {% if user_result.get_full_name %}
+                            <p class="text-sm text-gray-500">{{ user_result.get_full_name }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Resultados de Posts -->
+        {% if posts %}
+        <section>
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">{% trans "Publicações" %}</h2>
+            <div class="space-y-6">
+                {% for post in posts %}
+                <div class="card" data-post-id="{{ post.pk }}">
+                    <!-- Cabeçalho do Post -->
+                    <div class="flex items-center mb-4">
+                        <img class="h-10 w-10 rounded-full" 
+                             src="{% if post.author.profile.avatar %}{{ post.author.profile.avatar.url }}{% else %}https://ui-avatars.com/api/?name={{ post.author.username|urlencode }}&background=3b82f6&color=ffffff{% endif %}"
+                             alt="{{ post.author.username }}">
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-gray-900">{{ post.author.username }}</p>
+                            <p class="text-xs text-gray-500">{{ post.created_at|date:"d/m/Y H:i" }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Conteúdo do Post -->
+                    <a href="{% url 'posts:detail' post.pk %}" class="block group">
+                        <p class="text-gray-900 mb-4">{{ post.content }}</p>
+                        {% if post.image %}
+                        <img src="{{ post.image.url }}" alt="{% trans 'Imagem da publicação' %}" class="rounded-lg mb-4 group-hover:opacity-90 transition-opacity">
+                        {% endif %}
+                    </a>
+
+                    <!-- Ações do Post -->
+                    <div class="flex items-center justify-between border-t border-gray-200 pt-4">
+                        <div class="flex space-x-4">
+                            <button class="like-button flex items-center space-x-1 text-gray-500 hover:text-blue-600 {% if user in post.likes.all %}text-blue-600{% endif %}" data-post-id="{{ post.pk }}">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"></path>
+                                </svg>
+                                <span class="likes-count">{{ post.likes.count }}</span>
+                            </button>
+                            <a href="{% url 'posts:detail' post.pk %}#comments" class="flex items-center space-x-1 text-gray-500 hover:text-blue-600">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                                </svg>
+                                <span class="comments-count">{{ post.comments.count }}</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        {% if not hashtags and not users and not posts %}
+        <div class="text-center py-8">
+            <p class="text-gray-500">{% trans "Nenhum resultado encontrado para" %} "{{ query }}"</p>
+        </div>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

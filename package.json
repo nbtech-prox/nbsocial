@@ -1,0 +1,16 @@
+{
+  "name": "nbsocial",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "build": "tailwindcss -i input.css -o static/css/dist/styles.css --minify",
+    "dev": "tailwindcss -i input.css -o static/css/dist/styles.css --watch"
+  },
+  "dependencies": {
+    "autoprefixer": "^10.4.17",
+    "postcss": "^8.4.35"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.1"
+  }
+}

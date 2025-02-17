@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+{% load account %}
+
+{% block title %}{% trans "Entrar" %}{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+    <div class="card">
+        <h1 class="text-2xl font-bold text-gray-900 mb-6">{% trans "Entrar" %}</h1>
+
+        <form class="login" method="POST" action="{% url 'account_login' %}">
+            {% csrf_token %}
+            
+            {% if form.errors %}
+                <div class="rounded-md bg-red-50 p-4 mb-4">
+                    <div class="text-sm text-red-700">
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        {% endfor %}
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="space-y-4">
+                <div>
+                    <label for="id_login" class="block text-sm font-medium text-gray-700">{% trans "E-mail" %}</label>
+                    <input type="email" name="login" id="id_login" class="input-field" required>
+                </div>
+
+                <div>
+                    <label for="id_password" class="block text-sm font-medium text-gray-700">{% trans "Senha" %}</label>
+                    <input type="password" name="password" id="id_password" class="input-field" required>
+                </div>
+
+                <div class="flex items-center">
+                    <input type="checkbox" name="remember" id="id_remember" class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
+                    <label for="id_remember" class="ml-2 block text-sm text-gray-900">{% trans "Lembrar-me" %}</label>
+                </div>
+            </div>
+
+            {% if redirect_field_value %}
+                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+            {% endif %}
+
+            <div class="mt-6 space-y-4">
+                <button type="submit" class="w-full btn-primary">{% trans "Entrar" %}</button>
+                
+                <div class="text-sm text-center space-x-4">
+                    <a href="{% url 'account_reset_password' %}" class="text-primary hover:text-blue-800">
+                        {% trans "Esqueceu a senha?" %}
+                    </a>
+                    <span class="text-gray-500">•</span>
+                    <a href="{{ signup_url }}" class="text-primary hover:text-blue-800">
+                        {% trans "Criar conta" %}
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

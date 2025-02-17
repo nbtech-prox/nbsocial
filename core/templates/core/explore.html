@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Coluna Principal -->
+        <div class="lg:col-span-2 space-y-6">
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-2xl font-bold mb-4">{% trans "Explorar" %}</h2>
+                
+                <!-- Formulário de Busca -->
+                <form method="get" class="mb-6">
+                    <div class="flex gap-4">
+                        <div class="flex-1">
+                            <input type="text" 
+                                   name="q" 
+                                   value="{{ query }}"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                   placeholder="{% trans 'Buscar por hashtags, pessoas ou conteúdo...' %}">
+                        </div>
+                        <button type="submit" 
+                                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                            {% trans "Buscar" %}
+                        </button>
+                    </div>
+                </form>
+
+                {% if query %}
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold mb-2">{% trans "Resultados para" %} "{{ query }}"</h3>
+                        
+                        <!-- Resultados de Hashtags -->
+                        {% if hashtags %}
+                            <div class="mb-4">
+                                <h4 class="text-md font-medium text-gray-700 mb-2">{% trans "Hashtags" %}</h4>
+                                <div class="flex flex-wrap gap-2">
+                                    {% for hashtag in hashtags %}
+                                        <a href="{% url 'hashtags:detail' hashtag.name %}" 
+                                           class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 hover:bg-blue-200">
+                                            #{{ hashtag.name }}
+                                            <span class="ml-1 text-blue-600">({{ hashtag.total_posts }})</span>
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <!-- Resultados de Usuários -->
+                        {% if users %}
+                            <div class="mb-4">
+                                <h4 class="text-md font-medium text-gray-700 mb-2">{% trans "Pessoas" %}</h4>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {% for user in users %}
+                                        <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                                            {% if user.profile.avatar %}
+                                                <img src="{{ user.profile.avatar.url }}" 
+                                                     alt="{{ user.username }}"
+                                                     class="w-10 h-10 rounded-full">
+                                            {% else %}
+                                                <div class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center">
+                                                    <span class="text-gray-600 font-medium">
+                                                        {{ user.username|make_list|first|upper }}
+                                                    </span>
+                                                </div>
+                                            {% endif %}
+                                            <div>
+                                                <a href="{% url 'users:profile' user.username %}" 
+                                                   class="font-medium text-gray-900 hover:text-blue-600">
+                                                    {{ user.get_full_name|default:user.username }}
+                                                </a>
+                                                <p class="text-sm text-gray-500">@{{ user.username }}</p>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <!-- Resultados de Posts -->
+                        {% if posts %}
+                            <div>
+                                <h4 class="text-md font-medium text-gray-700 mb-2">{% trans "Publicações" %}</h4>
+                                <div class="space-y-4">
+                                    {% for post in posts %}
+                                        {% include "posts/post_card.html" with post=post %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        {% if not hashtags and not users and not posts %}
+                            <p class="text-gray-500 text-center py-4">
+                                {% trans "Nenhum resultado encontrado." %}
+                            </p>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Coluna Lateral -->
+        <div class="space-y-6">
+            <!-- Hashtags em Tendência -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold mb-4">{% trans "Hashtags em Tendência" %}</h3>
+                {% if trending_hashtags %}
+                    <div class="space-y-3">
+                        {% for hashtag in trending_hashtags %}
+                            <a href="{% url 'hashtags:detail' hashtag.name %}" 
+                               class="flex items-center justify-between hover:bg-gray-50 p-2 rounded">
+                                <span class="text-blue-600">#{{ hashtag.name }}</span>
+                                <span class="text-sm text-gray-500">{{ hashtag.total_posts }} {% trans "posts" %}</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-gray-500 text-center">
+                        {% trans "Nenhuma hashtag em tendência no momento." %}
+                    </p>
+                {% endif %}
+            </div>
+
+            <!-- Sugestões de Usuários -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold mb-4">{% trans "Sugestões para Seguir" %}</h3>
+                {% if suggested_users %}
+                    <div class="space-y-4">
+                        {% for user in suggested_users %}
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    {% if user.profile.avatar %}
+                                        <img src="{{ user.profile.avatar.url }}" 
+                                             alt="{{ user.username }}"
+                                             class="w-10 h-10 rounded-full">
+                                    {% else %}
+                                        <div class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center">
+                                            <span class="text-gray-600 font-medium">
+                                                {{ user.username|make_list|first|upper }}
+                                            </span>
+                                        </div>
+                                    {% endif %}
+                                    <div>
+                                        <a href="{% url 'users:profile' user.username %}" 
+                                           class="font-medium text-gray-900 hover:text-blue-600">
+                                            {{ user.get_full_name|default:user.username }}
+                                        </a>
+                                        <p class="text-sm text-gray-500">@{{ user.username }}</p>
+                                    </div>
+                                </div>
+                                <button class="follow-button px-3 py-1 border border-blue-600 text-blue-600 rounded-full hover:bg-blue-50"
+                                        data-username="{{ user.username }}">
+                                    {% trans "Seguir" %}
+                                </button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-gray-500 text-center">
+                        {% trans "Nenhuma sugestão no momento." %}
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Manipulador para botões de seguir
+    document.querySelectorAll('.follow-button').forEach(button => {
+        button.addEventListener('click', async function() {
+            const username = this.dataset.username;
+            try {
+                const response = await fetch(`/users/perfil/${username}/seguir/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    },
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    this.textContent = data.is_following ? '{% trans "Deixar de Seguir" %}' : '{% trans "Seguir" %}';
+                    this.classList.toggle('bg-blue-600');
+                    this.classList.toggle('text-white');
+                }
+            } catch (error) {
+                console.error('Erro ao seguir usuário:', error);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

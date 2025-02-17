@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+
+{% block title %}{% trans "Verificar E-mail" %}{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+    <div class="card">
+        <h1 class="text-2xl font-bold text-gray-900 mb-6">{% trans "Verificar E-mail" %}</h1>
+        
+        <div class="rounded-md bg-green-50 p-4 mb-6">
+            <div class="text-sm text-green-700">
+                {% blocktrans %}
+                Enviamos um e-mail de verificação para o seu endereço de e-mail.
+                Siga as instruções fornecidas no e-mail para completar o processo de registro.
+                {% endblocktrans %}
+            </div>
+        </div>
+
+        <p class="text-gray-600">
+            {% blocktrans %}
+            Se você não receber o e-mail em alguns minutos, por favor verifique sua pasta de spam
+            ou tente o processo de registro novamente.
+            {% endblocktrans %}
+        </p>
+    </div>
+</div>
+{% endblock %}

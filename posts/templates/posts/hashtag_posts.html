@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}#{{ hashtag.name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">#{{ hashtag.name }}</h1>
+        <p class="text-gray-500">{{ hashtag.post_count }} {% trans "publicações" %}</p>
+    </div>
+
+    <!-- Lista de Posts -->
+    <div class="space-y-6">
+        {% for post in posts %}
+        <div class="card" data-post-id="{{ post.pk }}">
+            <!-- Cabeçalho do Post -->
+            <div class="flex items-center mb-4">
+                <img class="h-10 w-10 rounded-full" 
+                     src="{% if post.author.profile.avatar %}{{ post.author.profile.avatar.url }}{% else %}https://ui-avatars.com/api/?name={{ post.author.username|urlencode }}&background=3b82f6&color=ffffff{% endif %}"
+                     alt="{{ post.author.username }}">
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-gray-900">{{ post.author.username }}</p>
+                    <p class="text-xs text-gray-500">{{ post.created_at|date:"d/m/Y H:i" }}</p>
+                </div>
+                {% if user == post.author %}
+                <div class="ml-auto">
+                    <a href="{% url 'posts:edit_post' post.pk %}" class="text-sm text-blue-600 hover:text-blue-800">{% trans "Editar" %}</a>
+                    <a href="{% url 'posts:delete_post' post.pk %}" class="ml-3 text-sm text-red-600 hover:text-red-800">{% trans "Excluir" %}</a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Conteúdo do Post -->
+            <a href="{% url 'posts:detail' post.pk %}" class="block group">
+                <p class="text-gray-900 mb-4">{{ post.content }}</p>
+                {% if post.image %}
+                <img src="{{ post.image.url }}" alt="{% trans 'Imagem da publicação' %}" class="rounded-lg mb-4 group-hover:opacity-90 transition-opacity">
+                {% endif %}
+            </a>
+
+            <!-- Ações do Post -->
+            <div class="flex items-center justify-between border-t border-gray-200 pt-4">
+                <div class="flex space-x-4">
+                    <button class="like-button flex items-center space-x-1 text-gray-500 hover:text-blue-600 {% if user in post.likes.all %}text-blue-600{% endif %}" data-post-id="{{ post.pk }}">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"></path>
+                        </svg>
+                        <span class="likes-count">{{ post.likes.count }}</span>
+                    </button>
+                    <a href="{% url 'posts:detail' post.pk %}#comments" class="flex items-center space-x-1 text-gray-500 hover:text-blue-600">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                        </svg>
+                        <span class="comments-count">{{ post.comments.count }}</span>
+                    </a>
+                </div>
+                <button class="report-button text-gray-500 hover:text-red-600" title="{% trans 'Denunciar' %}">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-8">
+            <p class="text-gray-500">{% trans "Nenhuma publicação encontrada com a hashtag" %} #{{ hashtag.name }}</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Paginação -->
+    {% if posts.has_other_pages %}
+    <div class="mt-8 flex justify-center">
+        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="{% trans 'Paginação' %}">
+            {% if posts.has_previous %}
+            <a href="?page={{ posts.previous_page_number }}" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                <span class="sr-only">{% trans "Anterior" %}</span>
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+            </a>
+            {% endif %}
+            
+            {% for num in page_range %}
+                {% if num == posts.number %}
+                <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-blue-50 text-sm font-medium text-blue-600">
+                    {{ num }}
+                </span>
+                {% elif num == "..." %}
+                <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                    {{ num }}
+                </span>
+                {% else %}
+                <a href="?page={{ num }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    {{ num }}
+                </a>
+                {% endif %}
+            {% endfor %}
+
+            {% if posts.has_next %}
+            <a href="?page={{ posts.next_page_number }}" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                <span class="sr-only">{% trans "Próxima" %}</span>
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </a>
+            {% endif %}
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
