@@ -1,0 +1,118 @@
+# Django
+*.log
+*.pot
+*.pyc
+__pycache__/
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Database
+*.sql
+!setup_database.sql
+*.sqlite3
+*.sqlite3-journal
+*.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Python
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Logs e backups
+*.log
+*.bak
+*.swp
+*.tmp
+*~
+
+# Arquivos de mídia e uploads
+media/*
+!media/.gitkeep
+static/admin/
+static/debug_toolbar/
+
+# Arquivos de segurança e configuração
+*.env
+*.env.*
+.env.local
+.env.*.local
+.env.development
+.env.test
+.env.production
+secrets.json
+secret_key.txt
+
+# Cache
+.cache/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Arquivos de distribuição
+*.tar.gz
+*.zip
+*.rar
+
+# Arquivos específicos do projeto
+setup_database.sql.bak
+recreate_db.sql
+
+# Arquivos temporários do sistema
+.DS_Store
+Thumbs.db
+desktop.ini
