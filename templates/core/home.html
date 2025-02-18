@@ -291,8 +291,14 @@
             </div>
 
             <!-- Coluna de Tendências -->
-            <div class="lg:col-span-1 space-y-6">
-                {% include "posts/trending_hashtags.html" %}
+            <div class="lg:col-span-1">
+                <div class="sticky top-4 space-y-4">
+                    <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+                        <div class="p-6">
+                            {% include "posts/trending_hashtags.html" %}
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

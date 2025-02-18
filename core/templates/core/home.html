@@ -1,12 +1,105 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block title %}Início{% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto">
-    <div class="bg-white shadow rounded-lg p-6">
-        <h1 class="text-3xl font-bold text-gray-900 mb-4">Bem-vindo ao NBSocial</h1>
-        <p class="text-gray-600">Uma rede social moderna e intuitiva.</p>
+<div class="min-h-screen bg-gray-50">
+    {% if messages %}
+    <div class="max-w-7xl mx-auto px-4 py-6">
+        {% for message in messages %}
+        <div class="rounded-md p-4 mb-4 {% if message.tags == 'error' %}bg-red-50 text-red-700{% else %}bg-green-50 text-green-700{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
     </div>
+    {% endif %}
+    
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <!-- Perfil e navegação -->
+            <div class="lg:col-span-1">
+                <div class="sticky top-4">
+                    <!-- Card do perfil -->
+                    <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+                        <div class="p-6">
+                            <h1 class="text-3xl font-bold text-gray-900 mb-4">Bem-vindo ao NBSocial</h1>
+                            <p class="text-gray-600">Uma rede social moderna e intuitiva.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feed de Posts -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Feed de Posts -->
+            </div>
+
+            <!-- Coluna de Tendências -->
+            <div class="lg:col-span-1">
+                <div class="sticky top-4">
+                    {% include "posts/trending_hashtags.html" %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% if not user.is_authenticated %}
+        {% include "core/landing.html" %}
+    {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Alpine.js -->
+<script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Imagem
+        const imageInput = document.getElementById('image-input');
+        const imagePreview = document.getElementById('image-preview');
+        const previewImage = imagePreview.querySelector('img');
+        const removeButton = document.getElementById('remove-image');
+
+        imageInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    imagePreview.classList.remove('hidden');
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        removeButton.addEventListener('click', function() {
+            imageInput.value = '';
+            imagePreview.classList.add('hidden');
+            previewImage.src = '';
+        });
+
+        // Hashtags
+        const contentInput = document.getElementById('content');
+        const hashtagsInput = document.getElementById('hashtags_text');
+
+        contentInput.addEventListener('input', function() {
+            // Extrai hashtags do conteúdo
+            const hashtags = this.value.match(/#\w+/g) || [];
+            // Atualiza o campo de hashtags
+            hashtagsInput.value = hashtags.join(' ');
+        });
+
+        hashtagsInput.addEventListener('input', function() {
+            const value = this.value;
+            // Adiciona # se necessário
+            if (value && !value.startsWith('#')) {
+                this.value = '#' + value;
+            }
+            // Substitui espaços por # quando necessário
+            this.value = this.value.replace(/\s+/g, ' ').replace(/\s#/g, ' #').replace(/([^#\s])\s/g, '$1 #');
+        });
+    });
+</script>
 {% endblock %}

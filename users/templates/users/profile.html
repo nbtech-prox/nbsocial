@@ -7,32 +7,32 @@
 <div class="max-w-2xl mx-auto px-4 py-4">
     <!-- Perfil Header -->
     <div class="bg-white rounded-lg shadow-md p-4 mb-6">
-        <div class="flex items-center space-x-4">
+        <div class="flex items-start space-x-4">
             {% if profile_user.avatar %}
-            <img src="{{ profile_user.avatar.url }}" alt="{{ profile_user.username }}" class="w-16 h-16 rounded-full object-cover">
+            <img src="{{ profile_user.avatar.url }}" alt="{{ profile_user.username }}" class="w-16 h-16 rounded-full object-cover flex-shrink-0">
             {% else %}
-            <div class="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
+            <div class="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
                 <span class="text-2xl text-gray-500">{{ profile_user.username.0|upper }}</span>
             </div>
             {% endif %}
-            <div class="flex-1">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h1 class="text-xl font-bold">{{ profile_user.get_full_name|default:profile_user.username }}</h1>
+            <div class="flex-1 min-w-0">
+                <div class="flex items-start justify-between">
+                    <div class="min-w-0 flex-1 pr-4">
+                        <h1 class="text-xl font-bold truncate">{{ profile_user.get_full_name|default:profile_user.username }}</h1>
                         {% if profile_user.bio %}
-                        <p class="text-gray-600 text-sm mt-1">{{ profile_user.bio }}</p>
+                        <p class="text-gray-600 text-sm mt-1 break-words overflow-hidden">{{ profile_user.bio }}</p>
                         {% endif %}
                     </div>
                     {% if user == profile_user %}
-                    <a href="{% url 'users:profile_edit' %}" class="btn-primary text-sm">
+                    <a href="{% url 'users:profile_edit' %}" class="btn-primary text-sm whitespace-nowrap flex-shrink-0">
                         {% trans "Editar Perfil" %}
                     </a>
                     {% else %}
-                    <div id="follow-stats-container">
+                    <div id="follow-stats-container" class="flex-shrink-0">
                         <form method="post" action="{% url 'users:toggle_follow' profile_user.username %}">
                             {% csrf_token %}
                             <button type="submit" 
-                                    class="px-4 py-2 rounded-full {% if is_following %}bg-gray-200 hover:bg-gray-300{% else %}bg-blue-600 hover:bg-blue-700 text-white{% endif %}">
+                                    class="px-4 py-2 rounded-full whitespace-nowrap {% if is_following %}bg-gray-200 hover:bg-gray-300{% else %}bg-blue-600 hover:bg-blue-700 text-white{% endif %}">
                                 {% if is_following %}
                                 {% trans "Deixar de Seguir" %}
                                 {% else %}

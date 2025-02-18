@@ -4,121 +4,173 @@
 {% block title %}{{ post.author.username }} - {% trans "Publicação" %}{% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto">
-    <div class="card mb-8" data-post-id="{{ post.pk }}">
-        <!-- Cabeçalho do Post -->
-        <div class="flex items-center mb-4">
-            {% if post.author.avatar %}
-                <img class="h-10 w-10 rounded-full object-cover" 
-                     src="{{ post.author.avatar.url }}"
-                     alt="{{ post.author.username }}">
-            {% else %}
-                <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                    <span class="text-blue-600 font-medium">
-                        {{ post.author.username|make_list|first|upper }}
-                    </span>
-                </div>
-            {% endif %}
-            <div class="ml-3">
-                <p class="text-sm font-medium text-gray-900">{{ post.author.username }}</p>
-                <p class="text-xs text-gray-500">{{ post.created_at|date:"d/m/Y H:i" }}</p>
-            </div>
-            {% if user == post.author %}
-            <div class="ml-auto">
-                <a href="{% url 'posts:edit_post' post.pk %}" class="text-sm text-blue-600 hover:text-blue-800">{% trans "Editar" %}</a>
-                <a href="{% url 'posts:delete_post' post.pk %}" class="ml-3 text-sm text-red-600 hover:text-red-800">{% trans "Excluir" %}</a>
-            </div>
-            {% endif %}
-        </div>
-
-        <!-- Conteúdo do Post -->
-        {% if post.image %}
-        <div class="flex justify-center mb-4">
-            <img src="{{ post.image.url }}" 
-                 alt="{% trans 'Imagem da publicação' %}" 
-                 class="rounded-lg max-h-[500px] object-contain">
-        </div>
-        {% endif %}
-        <p class="text-gray-900 mb-4">{{ post.content }}</p>
-
-        <!-- Ações do Post -->
-        <div class="flex items-center border-t border-gray-200 pt-4">
-            <div class="flex space-x-4">
-                {% include "posts/partials/post_likes.html" with post=post %}
-
-                <div class="flex items-center space-x-1 text-gray-500">
-                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 12c0 2.104.859 4.023 2.273 5.48.432.447.74 1.04.586 1.641a4.483 4.483 0 01-.923 1.785A5.969 5.969 0 006 21c1.282 0 2.47-.402 3.445-1.087.81.22 1.668.337 2.555.337z" />
-                    </svg>
-                    <span class="text-sm font-medium">{{ post.comments.count }}</span>
-                </div>
-
-                <!-- Share Button -->
-                <button class="flex items-center space-x-1 text-gray-500 hover:text-blue-600"
-                        onclick="sharePost('{{ post.get_absolute_url }}', '{{ post.content|truncatechars:100|escapejs }}')">
-                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
-                    </svg>
-                    <span class="text-sm font-medium">{% trans "Compartilhar" %}</span>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Seção de Comentários -->
-    <div class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">{% trans "Comentários" %}</h2>
-        
-        <!-- Formulário de Comentário -->
-        <form method="POST" action="{% url 'posts:add_comment' post.id %}" class="mb-6">
-            {% csrf_token %}
-            <div class="mb-4">
-                <label for="content" class="block text-sm font-medium text-gray-700 mb-2">{% trans "Seu comentário" %}</label>
-                <textarea name="content" id="content" rows="3" 
-                          class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                          placeholder="{% trans 'Escreva seu comentário...' %}" required></textarea>
-            </div>
-            <button type="submit" class="btn-primary">{% trans "Comentar" %}</button>
-        </form>
-
-        <!-- Lista de Comentários -->
-        <div class="space-y-4">
-            {% for comment in comments %}
-            <div class="flex space-x-3">
-                {% if comment.author.avatar %}
-                <img class="h-8 w-8 rounded-full object-cover" 
-                     src="{{ comment.author.avatar.url }}"
-                     alt="{{ comment.author.username }}">
-                {% else %}
-                <div class="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
-                    <span class="text-blue-600 font-medium">
-                        {{ comment.author.username|make_list|first|upper }}
-                    </span>
-                </div>
-                {% endif %}
-                <div class="flex-1">
-                    <div class="bg-gray-50 rounded-lg px-4 py-2">
-                        <div class="flex items-center justify-between">
-                            <h3 class="text-sm font-medium text-gray-900">{{ comment.author.username }}</h3>
-                            <p class="text-xs text-gray-500">{{ comment.created_at|date:"d/m/Y H:i" }}</p>
+<div class="max-w-7xl mx-auto">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <!-- Coluna Esquerda -->
+        <div class="lg:col-span-1">
+            <div class="sticky top-4 space-y-4">
+                <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+                    <div class="p-6">
+                        {% if user.avatar %}
+                            <img class="h-20 w-20 rounded-full object-cover mx-auto" 
+                                 src="{{ user.avatar.url }}"
+                                 alt="{{ user.username }}">
+                        {% else %}
+                            <div class="h-20 w-20 rounded-full bg-blue-100 flex items-center justify-center mx-auto">
+                                <span class="text-blue-600 font-medium text-2xl">
+                                    {{ user.username|make_list|first|upper }}
+                                </span>
+                            </div>
+                        {% endif %}
+                        <h2 class="text-xl font-semibold text-gray-900 text-center mt-4">{{ user.username }}</h2>
+                        <div class="mt-6 space-y-2">
+                            <a href="{% url 'core:home' %}" class="flex items-center space-x-3 text-gray-700 hover:text-blue-600 p-2 rounded-lg hover:bg-gray-50">
+                                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                                </svg>
+                                <span>{% trans "Página Inicial" %}</span>
+                            </a>
+                            <a href="{% url 'posts:create' %}" class="flex items-center space-x-3 text-gray-700 hover:text-blue-600 p-2 rounded-lg hover:bg-gray-50">
+                                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                </svg>
+                                <span>{% trans "Nova Publicação" %}</span>
+                            </a>
+                            <a href="{% url 'users:profile' user.username %}" class="flex items-center space-x-3 text-gray-700 hover:text-blue-600 p-2 rounded-lg hover:bg-gray-50">
+                                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                                </svg>
+                                <span>{% trans "Meu Perfil" %}</span>
+                            </a>
                         </div>
-                        <p class="text-sm text-gray-700 mt-1">{{ comment.content }}</p>
                     </div>
-                    {% if user == comment.author %}
-                    <div class="mt-1 flex justify-end">
-                        <form method="POST" action="{% url 'posts:delete_comment' comment.pk %}" class="inline">
-                            {% csrf_token %}
-                            <button type="submit" class="text-xs text-red-600 hover:text-red-800">
-                                {% trans "Excluir" %}
-                            </button>
-                        </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Coluna Central - Post -->
+        <div class="lg:col-span-2">
+            <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+                <div class="p-6">
+                    <!-- Cabeçalho do Post -->
+                    <div class="flex items-center mb-4">
+                        {% if post.author.avatar %}
+                            <img class="h-10 w-10 rounded-full object-cover" 
+                                 src="{{ post.author.avatar.url }}"
+                                 alt="{{ post.author.username }}">
+                        {% else %}
+                            <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                <span class="text-blue-600 font-medium">
+                                    {{ post.author.username|make_list|first|upper }}
+                                </span>
+                            </div>
+                        {% endif %}
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-gray-900">{{ post.author.username }}</p>
+                            <p class="text-xs text-gray-500">{{ post.created_at|date:"d/m/Y H:i" }}</p>
+                        </div>
+                        {% if user == post.author %}
+                        <div class="ml-auto">
+                            <a href="{% url 'posts:edit_post' post.pk %}" class="text-sm text-blue-600 hover:text-blue-800">{% trans "Editar" %}</a>
+                            <a href="{% url 'posts:delete_post' post.pk %}" class="ml-3 text-sm text-red-600 hover:text-red-800">{% trans "Excluir" %}</a>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Conteúdo do Post -->
+                    {% if post.image %}
+                    <div class="flex justify-center mb-4">
+                        <img src="{{ post.image.url }}" 
+                             alt="{% trans 'Imagem da publicação' %}" 
+                             class="rounded-lg max-h-[500px] object-contain">
                     </div>
                     {% endif %}
+                    <p class="text-gray-900 mb-4">{{ post.content }}</p>
+
+                    <!-- Ações do Post -->
+                    <div class="flex items-center border-t border-gray-200 pt-4">
+                        <div class="flex space-x-4">
+                            {% include "posts/partials/post_likes.html" with post=post %}
+
+                            <div class="flex items-center space-x-1 text-gray-500">
+                                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 20.25c4.97 0 9-3.694 9-8.25s-4.03-8.25-9-8.25S3 7.444 3 12c0 2.104.859 4.023 2.273 5.48.432.447.74 1.04.586 1.641a4.483 4.483 0 01-.923 1.785A5.969 5.969 0 006 21c1.282 0 2.47-.402 3.445-1.087.81.22 1.668.337 2.555.337z" />
+                                </svg>
+                                <span class="text-sm font-medium">{{ post.comments.count }}</span>
+                            </div>
+
+                            <!-- Share Button -->
+                            <button class="flex items-center space-x-1 text-gray-500 hover:text-blue-600"
+                                    onclick="sharePost('{{ post.get_absolute_url }}', '{{ post.content|truncatechars:100|escapejs }}')">
+                                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
+                                </svg>
+                                <span class="text-sm font-medium">{% trans "Compartilhar" %}</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
-            {% empty %}
-            <p class="text-gray-500 text-center py-4">{% trans "Nenhum comentário ainda. Seja o primeiro a comentar!" %}</p>
-            {% endfor %}
+
+            <!-- Comentários -->
+            <div class="bg-white rounded-lg shadow p-6 mt-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">{% trans "Comentários" %}</h2>
+                
+                <!-- Formulário de Comentário -->
+                <form method="POST" action="{% url 'posts:add_comment' post.id %}" class="mb-6">
+                    {% csrf_token %}
+                    <div class="flex">
+                        <textarea name="content" 
+                                  class="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  placeholder="{% trans 'Escreva um comentário...' %}"
+                                  rows="3"
+                                  required></textarea>
+                    </div>
+                    <div class="mt-2 flex justify-end">
+                        <button type="submit" 
+                                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                            {% trans "Comentar" %}
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Lista de Comentários -->
+                {% for comment in post.comments.all %}
+                <div class="border-t border-gray-200 py-4 {% if not forloop.last %}mb-4{% endif %}">
+                    <div class="flex items-start">
+                        {% if comment.author.avatar %}
+                            <img class="h-8 w-8 rounded-full object-cover" 
+                                 src="{{ comment.author.avatar.url }}"
+                                 alt="{{ comment.author.username }}">
+                        {% else %}
+                            <div class="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+                                <span class="text-blue-600 font-medium text-sm">
+                                    {{ comment.author.username|make_list|first|upper }}
+                                </span>
+                            </div>
+                        {% endif %}
+                        <div class="ml-3 flex-1">
+                            <p class="text-sm font-medium text-gray-900">{{ comment.author.username }}</p>
+                            <p class="text-sm text-gray-700">{{ comment.content }}</p>
+                            <p class="text-xs text-gray-500 mt-1">{{ comment.created_at|date:"d/m/Y H:i" }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-gray-500 text-center py-4">{% trans "Nenhum comentário ainda." %}</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Coluna Direita -->
+        <div class="lg:col-span-1">
+            <div class="sticky top-4 space-y-4">
+                <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+                    <div class="p-6">
+                        {% include "posts/trending_hashtags.html" %}
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
