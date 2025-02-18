@@ -1,0 +1,12 @@
+{% load i18n %}
+<a href="{% url 'users:followers' profile_user.username %}" class="text-gray-600 hover:text-gray-800">
+    <span class="font-bold">{{ followers.count }}</span> 
+    {% blocktrans count counter=followers.count %}seguidor{% plural %}seguidores{% endblocktrans %}
+</a>
+<a href="{% url 'users:following' profile_user.username %}" class="text-gray-600 hover:text-gray-800">
+    <span class="font-bold">{{ following.count }}</span> seguindo
+</a>
+<span class="text-gray-600">
+    <span class="font-bold">{{ posts.count }}</span> 
+    {% blocktrans count counter=posts.count %}post{% plural %}posts{% endblocktrans %}
+</span>

@@ -27,14 +27,51 @@
                     <a href="{% url 'users:profile_edit' %}" class="btn-primary text-sm">
                         {% trans "Editar Perfil" %}
                     </a>
+                    {% else %}
+                    <div id="follow-stats-container">
+                        <form method="post" action="{% url 'users:toggle_follow' profile_user.username %}">
+                            {% csrf_token %}
+                            <button type="submit" 
+                                    class="px-4 py-2 rounded-full {% if is_following %}bg-gray-200 hover:bg-gray-300{% else %}bg-blue-600 hover:bg-blue-700 text-white{% endif %}">
+                                {% if is_following %}
+                                {% trans "Deixar de Seguir" %}
+                                {% else %}
+                                {% trans "Seguir" %}
+                                {% endif %}
+                            </button>
+                        </form>
+                    </div>
                     {% endif %}
+                </div>
+                
+                <!-- Estatísticas -->
+                <div class="flex space-x-4 mt-4">
+                    <a href="{% url 'users:followers' profile_user.username %}" class="text-gray-600 hover:text-gray-800">
+                        <span class="font-bold">{{ followers_count }}</span> 
+                        {% if followers_count == 1 %}
+                            {% trans "seguidor" %}
+                        {% else %}
+                            {% trans "seguidores" %}
+                        {% endif %}
+                    </a>
+                    <a href="{% url 'users:following' profile_user.username %}" class="text-gray-600 hover:text-gray-800">
+                        <span class="font-bold">{{ following_count }}</span> {% trans "seguindo" %}
+                    </a>
+                    <span class="text-gray-600">
+                        <span class="font-bold">{{ posts_count }}</span> 
+                        {% if posts_count == 1 %}
+                            {% trans "post" %}
+                        {% else %}
+                            {% trans "posts" %}
+                        {% endif %}
+                    </span>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Posts -->
-    <div class="space-y-4">
+    <div class="mt-8">
         {% for post in posts %}
         <div class="bg-white rounded-lg shadow-md">
             <!-- Cabeçalho do Post -->
@@ -158,4 +195,40 @@
 {% block extra_js %}
 <!-- Alpine.js -->
 <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+<script>
+    function toggleFollow(button) {
+        const username = button.dataset.username;
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        
+        fetch(`/users/perfil/${username}/seguir/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Atualiza o botão
+            if (data.is_following) {
+                button.textContent = "Deixar de Seguir";
+                button.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'text-white');
+                button.classList.add('bg-gray-200', 'hover:bg-gray-300');
+            } else {
+                button.textContent = "Seguir";
+                button.classList.remove('bg-gray-200', 'hover:bg-gray-300');
+                button.classList.add('bg-blue-600', 'hover:bg-blue-700', 'text-white');
+            }
+            
+            // Atualiza os contadores
+            document.getElementById('followers-count').textContent = data.followers_count;
+            document.getElementById('following-count').textContent = data.following_count;
+            
+            // Atualiza o texto plural/singular
+            document.getElementById('followers-text').textContent = 
+                data.followers_count === 1 ? 'seguidor' : 'seguidores';
+        });
+    }
+</script>
 {% endblock %}

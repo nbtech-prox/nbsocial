@@ -1,0 +1,37 @@
+{% load i18n %}
+<div id="follow-container">
+    <button class="follow-button px-4 py-2 rounded-full {% if is_following %}bg-gray-200 hover:bg-gray-300{% else %}bg-blue-600 hover:bg-blue-700 text-white{% endif %}"
+            hx-post="{% url 'users:toggle_follow' profile_user.username %}"
+            hx-target="#follow-container"
+            hx-swap="innerHTML"
+            hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+        {% if is_following %}
+        {% trans "Deixar de Seguir" %}
+        {% else %}
+        {% trans "Seguir" %}
+        {% endif %}
+    </button>
+
+    <!-- Estatísticas -->
+    <div class="flex space-x-4 mt-4">
+        {% with followers_num=followers_count|add:0 %}
+        <a href="{% url 'users:followers' profile_user.username %}" class="text-gray-600 hover:text-gray-800">
+            <span class="font-bold">{{ followers_num }}</span> 
+            {% blocktrans count counter=followers_num %}seguidor{% plural %}seguidores{% endblocktrans %}
+        </a>
+        {% endwith %}
+
+        {% with following_num=following_count|add:0 %}
+        <a href="{% url 'users:following' profile_user.username %}" class="text-gray-600 hover:text-gray-800">
+            <span class="font-bold">{{ following_num }}</span> seguindo
+        </a>
+        {% endwith %}
+
+        {% with posts_num=posts_count|add:0 %}
+        <span class="text-gray-600">
+            <span class="font-bold">{{ posts_num }}</span> 
+            {% blocktrans count counter=posts_num %}post{% plural %}posts{% endblocktrans %}
+        </span>
+        {% endwith %}
+    </div>
+</div>
