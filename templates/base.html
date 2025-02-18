@@ -77,6 +77,12 @@
                     {% if user.is_authenticated %}
                         <a href="{% url 'core:explore' %}" class="nav-link">Explorar</a>
                         <a href="{% url 'posts:create' %}" class="btn-primary">Nova Publicação</a>
+                        <a href="{% url 'users:profile_edit' %}" class="nav-link flex items-center">
+                            <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                            Editar Perfil
+                        </a>
                     {% else %}
                         <a href="{% url 'account_login' %}" class="nav-link">Entrar</a>
                         <a href="{% url 'account_signup' %}" class="btn-primary">Registrar</a>

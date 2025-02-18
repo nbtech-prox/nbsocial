@@ -1,25 +1,23 @@
 {% load i18n %}
 
-<div class="bg-white shadow-lg rounded-lg overflow-hidden">
-    <div class="p-6">
-        <h2 class="text-xl font-bold text-gray-900">{% trans "Tendências" %}</h2>
-        
-        <div class="mt-6 space-y-2">
-            {% for trend in trends %}
-            <a href="{% url 'posts:detail' trend.id %}" class="nav-link block">
-                <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                </svg>
-                {{ trend.content }}
-            </a>
-            {% empty %}
-            <div class="nav-link block text-gray-500">
-                <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                </svg>
-                {% trans "Nenhuma tendência no momento." %}
-            </div>
-            {% endfor %}
+<div>
+    <h2 class="text-xl font-bold text-gray-900 mb-4">{% trans "Tendências" %}</h2>
+    
+    <div class="space-y-3">
+        {% for trend in trends %}
+        <a href="{% url 'posts:detail' trend.id %}" class="block text-gray-600 hover:text-gray-900">
+            <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+            </svg>
+            {{ trend.content }}
+        </a>
+        {% empty %}
+        <div class="text-gray-500">
+            <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+            {% trans "Nenhuma tendência no momento." %}
         </div>
+        {% endfor %}
     </div>
 </div>
