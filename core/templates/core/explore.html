@@ -148,8 +148,10 @@
                                         <p class="text-sm text-gray-500">@{{ user.username }}</p>
                                     </div>
                                 </div>
-                                <button class="follow-button px-3 py-1 border border-blue-600 text-blue-600 rounded-full hover:bg-blue-50"
-                                        data-username="{{ user.username }}">
+                                <button class="follow-button inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                        hx-post="{% url 'users:toggle_follow' user.username %}"
+                                        hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                                        hx-swap="outerHTML">
                                     {% trans "Seguir" %}
                                 </button>
                             </div>

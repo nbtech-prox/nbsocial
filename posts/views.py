@@ -92,7 +92,7 @@ def create_post(request):
     else:
         form = PostForm()
     
-    return render(request, 'posts/post_form.html', {'form': form})
+    return render(request, 'posts/create.html', {'form': form})
 
 @login_required
 def edit_post(request, pk):

@@ -4,44 +4,168 @@
 {% block title %}{% trans "Nova Publicação" %}{% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto">
-    <div class="card">
-        <h1 class="text-2xl font-bold text-gray-900 mb-6">{% trans "Nova Publicação" %}</h1>
-
-        <form method="POST" enctype="multipart/form-data" class="space-y-6">
-            {% csrf_token %}
-            
-            {% if form.errors %}
-                <div class="rounded-md bg-red-50 p-4">
-                    <div class="text-sm text-red-700">
-                        {% for field in form %}
-                            {% for error in field.errors %}
-                                <p>{{ error }}</p>
-                            {% endfor %}
-                        {% endfor %}
+<div class="min-h-screen bg-gray-50">
+    <div class="max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <!-- Perfil e navegação -->
+            <div class="lg:col-span-1">
+                <div class="sticky top-4 space-y-4">
+                    <!-- Card do perfil -->
+                    <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+                        <div class="p-6">
+                            <div class="flex items-center space-x-4">
+                                {% if user.avatar %}
+                                <img src="{{ user.avatar.url }}" alt="{{ user.username }}"
+                                     class="h-16 w-16 rounded-full object-cover border-2 border-blue-100">
+                                {% else %}
+                                <div class="h-16 w-16 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center border-2 border-blue-100">
+                                    <span class="text-2xl text-white font-medium">
+                                        {{ user.username|make_list|first|upper }}
+                                    </span>
+                                </div>
+                                {% endif %}
+                                <div>
+                                    <h2 class="text-xl font-bold text-gray-900">{{ user.username }}</h2>
+                                    <p class="text-sm text-gray-500">@{{ user.username }}</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Links de navegação -->
+                            <div class="mt-6 space-y-2">
+                                <a href="{% url 'core:home' %}" class="nav-link block">
+                                    <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                                    </svg>
+                                    Início
+                                </a>
+                                <a href="{% url 'users:find_users' %}" class="nav-link block">
+                                    <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                    </svg>
+                                    Encontrar Pessoas
+                                </a>
+                                <a href="{% url 'account_logout' %}" class="nav-link block text-red-600 hover:text-red-800 hover:bg-red-50">
+                                    <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                    </svg>
+                                    Sair
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            {% endif %}
-
-            <div>
-                <label for="id_content" class="block text-sm font-medium text-gray-700">{% trans "Conteúdo" %}</label>
-                <textarea name="content" id="id_content" rows="4" 
-                    class="input-field" required>{{ form.content.value|default:'' }}</textarea>
             </div>
 
-            <div>
-                <label for="id_image" class="block text-sm font-medium text-gray-700">{% trans "Imagem (opcional)" %}</label>
-                <input type="file" name="image" id="id_image" accept="image/*"
-                    class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4
-                    file:rounded-full file:border-0 file:text-sm file:font-semibold
-                    file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+            <!-- Conteúdo Principal -->
+            <div class="lg:col-span-2">
+                <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+                    <div class="p-6">
+                        <form method="POST" enctype="multipart/form-data" class="space-y-4">
+                            {% csrf_token %}
+                            
+                            {% if form.errors %}
+                                <div class="rounded-md bg-red-50 p-4">
+                                    <div class="text-sm text-red-700">
+                                        {% for field in form %}
+                                            {% for error in field.errors %}
+                                                <p>{{ error }}</p>
+                                            {% endfor %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            <div>
+                                <label for="id_content" class="sr-only">{% trans "Conteúdo" %}</label>
+                                <textarea id="id_content" 
+                                          name="content" 
+                                          rows="3"
+                                          class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                          placeholder="{% trans 'O que está acontecendo?' %}"
+                                          required>{{ form.content.value|default:'' }}</textarea>
+                            </div>
+
+                            <div>
+                                <label for="hashtags_text" class="sr-only">{% trans "Hashtags" %}</label>
+                                <input type="text" 
+                                       id="hashtags_text" 
+                                       name="hashtags_text"
+                                       class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                       placeholder="{% trans 'Adicione hashtags (ex: #python #django)' %}">
+                            </div>
+
+                            <div class="flex items-center justify-between pt-2">
+                                <div class="flex items-center space-x-4">
+                                    <label class="cursor-pointer">
+                                        <input type="file" 
+                                               name="image" 
+                                               class="hidden" 
+                                               accept="image/*" 
+                                               id="image-input">
+                                        <svg class="h-6 w-6 text-gray-400 hover:text-blue-500" 
+                                             fill="none" 
+                                             stroke="currentColor" 
+                                             viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" 
+                                                  stroke-linejoin="round" 
+                                                  stroke-width="2"
+                                                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                    </label>
+                                    <!-- Preview da imagem -->
+                                    <div id="image-preview" class="hidden flex items-center">
+                                        <img src="" alt="Preview" class="h-10 w-10 object-cover rounded">
+                                        <button type="button" id="remove-image" class="ml-2 text-red-500 hover:text-red-700">
+                                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <button type="submit" 
+                                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    {% trans "Publicar" %}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
 
-            <div class="flex justify-end space-x-4">
-                <a href="{% url 'core:home' %}" class="btn-secondary">{% trans "Cancelar" %}</a>
-                <button type="submit" class="btn-primary">{% trans "Publicar" %}</button>
+            <!-- Coluna da direita (vazia para manter o grid) -->
+            <div class="lg:col-span-1">
             </div>
-        </form>
+        </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const imageInput = document.getElementById('image-input');
+        const imagePreview = document.getElementById('image-preview');
+        const previewImage = imagePreview.querySelector('img');
+        const removeButton = document.getElementById('remove-image');
+
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    imagePreview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        removeButton.addEventListener('click', function() {
+            imageInput.value = '';
+            imagePreview.classList.add('hidden');
+            previewImage.src = '';
+        });
+    });
+</script>
 {% endblock %}
