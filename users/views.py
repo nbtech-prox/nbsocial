@@ -89,7 +89,7 @@ def toggle_follow(request, username):
 @login_required
 def follow_toggle(request, username):
     """Seguir/deixar de seguir usuário"""
-    if request.method == 'POST':
+    if request.method == 'POST' and request.is_ajax():
         user_to_follow = get_object_or_404(CustomUser, username=username)
         
         if user_to_follow == request.user:
@@ -97,20 +97,24 @@ def follow_toggle(request, username):
                 'error': _('Você não pode seguir a si mesmo.')
             }, status=400)
         
-        following, created = UserFollowing.objects.get_or_create(
+        following = UserFollowing.objects.filter(
             user=request.user,
             following_user=user_to_follow
         )
         
-        if not created:
+        if following.exists():
             following.delete()
             is_following = False
         else:
+            UserFollowing.objects.create(
+                user=request.user,
+                following_user=user_to_follow
+            )
             is_following = True
         
         return JsonResponse({
             'is_following': is_following,
-            'followers_count': user_to_follow.followers.count()
+            'followers_count': UserFollowing.objects.filter(following_user=user_to_follow).count()
         })
     
     return JsonResponse({'error': _('Método não permitido')}, status=405)

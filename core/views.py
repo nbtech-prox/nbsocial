@@ -43,7 +43,7 @@ def explore(request):
             Q(first_name__icontains=query) |
             Q(last_name__icontains=query)
         ).annotate(
-            followers_count=Count('followers')
+            followers_count=Count('follower_relationships')
         ).order_by('-followers_count')
     
     # Sempre buscar posts populares e usuários sugeridos para a sidebar
@@ -54,11 +54,11 @@ def explore(request):
     ).order_by('-interaction_count')[:10]
     
     # Usuários sugeridos (excluindo os que o usuário já segue)
-    following_ids = request.user.following.values_list('id', flat=True)
+    following_ids = request.user.following_relationships.values_list('following_user_id', flat=True)
     suggested_users = CustomUser.objects.exclude(
         Q(id__in=following_ids) | Q(id=request.user.id)
     ).annotate(
-        followers_count=Count('followers')
+        followers_count=Count('follower_relationships')
     ).order_by('-followers_count')[:5]
     
     # Hashtags em tendência

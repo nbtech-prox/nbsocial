@@ -70,14 +70,18 @@
             </div>
             
             <!-- Estatísticas -->
-            <div class="mt-4 flex justify-center space-x-8">
+            <div class="grid grid-cols-3 gap-4 mt-6">
+                <div class="text-center">
+                    <div class="text-xl font-bold text-gray-900">{{ profile_user.posts.count }}</div>
+                    <div class="text-sm text-gray-500">{% trans "Posts" %}</div>
+                </div>
                 <a href="{% url 'users:followers' profile_user.username %}" class="text-center">
-                    <div class="text-xl font-bold text-gray-900">{{ followers.count }}</div>
-                    <div class="text-sm text-gray-500">Seguidores</div>
+                    <div class="text-xl font-bold text-gray-900">{{ profile_user.follower_relationships.count }}</div>
+                    <div class="text-sm text-gray-500">{% trans "Seguidores" %}</div>
                 </a>
                 <a href="{% url 'users:following' profile_user.username %}" class="text-center">
-                    <div class="text-xl font-bold text-gray-900">{{ following.count }}</div>
-                    <div class="text-sm text-gray-500">Seguindo</div>
+                    <div class="text-xl font-bold text-gray-900">{{ profile_user.following_relationships.count }}</div>
+                    <div class="text-sm text-gray-500">{% trans "Seguindo" %}</div>
                 </a>
             </div>
             

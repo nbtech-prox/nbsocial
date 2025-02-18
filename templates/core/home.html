@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
-{% block title %}Início{% endblock %}
+{% block title %}{% trans "Página Inicial" %}{% endblock %}
 
 {% block content %}
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -23,15 +24,15 @@
             <div class="mt-6 grid grid-cols-3 gap-4 text-center">
                 <div>
                     <p class="text-2xl font-bold text-gray-900">{{ user.posts.count }}</p>
-                    <p class="text-sm text-gray-500">Posts</p>
+                    <p class="text-sm text-gray-500">{% trans "Posts" %}</p>
                 </div>
                 <div>
-                    <p class="text-2xl font-bold text-gray-900">{{ user.followers.count }}</p>
-                    <p class="text-sm text-gray-500">Seguidores</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ user.follower_relationships.count }}</p>
+                    <p class="text-sm text-gray-500">{% trans "Seguidores" %}</p>
                 </div>
                 <div>
-                    <p class="text-2xl font-bold text-gray-900">{{ user.following.count }}</p>
-                    <p class="text-sm text-gray-500">Seguindo</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ user.following_relationships.count }}</p>
+                    <p class="text-sm text-gray-500">{% trans "Seguindo" %}</p>
                 </div>
             </div>
         </div>
