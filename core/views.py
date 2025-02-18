@@ -8,6 +8,25 @@ from posts.views import get_trending_hashtags
 
 def home(request):
     """Página inicial"""
+    if request.user.is_authenticated:
+        # Obtém IDs dos usuários que o usuário atual segue
+        following_ids = request.user.following_relationships.values_list('following_user_id', flat=True)
+        
+        # Busca posts do usuário e dos usuários que ele segue
+        posts = Post.objects.select_related('author').prefetch_related(
+            'likes', 'comments', 'hashtags'
+        ).filter(
+            Q(author=request.user) | Q(author_id__in=following_ids)
+        ).order_by('-created_at')
+        
+        # Obtém hashtags em tendência
+        trending_hashtags = get_trending_hashtags()
+        
+        return render(request, 'core/home.html', {
+            'posts': posts,
+            'trends': trending_hashtags,
+        })
+    
     return render(request, 'core/home.html')
 
 @login_required

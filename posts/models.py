@@ -65,6 +65,12 @@ class Post(models.Model):
                 hashtag, _ = Hashtag.objects.get_or_create(name=hashtag_name)
                 # Adiciona ao post
                 self.hashtags.add(hashtag)
+    
+    def extract_mentions(self):
+        """Extrai menções (@username) do conteúdo do post"""
+        mention_pattern = re.compile(r'@(\w+)')
+        mention_matches = mention_pattern.finditer(self.content)
+        return {match.group(1) for match in mention_matches}
 
 class Comment(models.Model):
     """Modelo para comentários em posts"""
@@ -99,27 +105,24 @@ class Like(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        verbose_name=_('utilizador')
+        related_name='likes',
+        verbose_name=_('usuário')
     )
     post = models.ForeignKey(
         Post,
         on_delete=models.CASCADE,
+        related_name='post_likes',
         verbose_name=_('publicação')
     )
     created_at = models.DateTimeField(_('criado em'), auto_now_add=True)
     
     class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=['user', 'post'],
-                name='unique_like'
-            )
-        ]
-        verbose_name = _('gosto')
-        verbose_name_plural = _('gostos')
+        verbose_name = _('curtida')
+        verbose_name_plural = _('curtidas')
+        unique_together = ['user', 'post']
     
     def __str__(self):
-        return f'{self.user.username} gostou de {self.post}'
+        return f'{self.user.username} curtiu {self.post}'
 
 class Hashtag(models.Model):
     """Modelo para hashtags"""

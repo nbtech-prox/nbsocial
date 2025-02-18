@@ -1,104 +1,343 @@
 {% extends 'base.html' %}
-{% load i18n %}
+{% load i18n static %}
 
 {% block title %}{% trans "Página Inicial" %}{% endblock %}
 
 {% block content %}
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    <!-- Perfil do usuário -->
-    <div class="md:col-span-1">
-        <div class="bg-white shadow rounded-lg p-6">
-            <div class="flex items-center">
-                {% if user.avatar %}
-                    <img class="h-16 w-16 rounded-full" src="{{ user.avatar.url }}" alt="{{ user.username }}">
-                {% else %}
-                    <div class="h-16 w-16 rounded-full bg-primary text-white text-2xl flex items-center justify-center">
-                        {{ user.username|make_list|first|upper }}
+<div class="min-h-screen bg-gray-50">
+    {% if not user.is_authenticated %}
+    <!-- Hero Section -->
+    <div class="relative bg-gradient-to-r from-blue-600 to-indigo-700 overflow-hidden">
+        <!-- Ícone grande de fundo -->
+        <div class="absolute -right-32 top-1/2 transform -translate-y-1/2 opacity-50">
+            <svg width="600" height="600" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" class="w-[600px] h-[600px]">
+                <style>
+                    .globe {
+                        fill: none;
+                        stroke: white;
+                        stroke-width: 5;
+                    }
+                    .circle {
+                        fill: none;
+                        stroke: white;
+                        stroke-width: 7;
+                    }
+                </style>
+                <circle class="circle" cx="200" cy="200" r="180"/>
+                <path class="globe" d="M 20 200 h 360"/>
+                <path class="globe" d="M 200 20 v 360"/>
+                <path class="globe" d="M 50 100 Q 200 20 350 100"/>
+                <path class="globe" d="M 20 200 Q 200 50 380 200"/>
+                <path class="globe" d="M 20 200 Q 200 350 380 200"/>
+                <path class="globe" d="M 50 300 Q 200 380 350 300"/>
+                <path class="globe" d="M 100 50 Q 20 200 100 350"/>
+                <path class="globe" d="M 200 20 Q 50 200 200 380"/>
+                <path class="globe" d="M 200 20 Q 350 200 200 380"/>
+                <path class="globe" d="M 300 50 Q 380 200 300 350"/>
+            </svg>
+        </div>
+        
+        <div class="max-w-7xl mx-auto">
+            <div class="relative z-10 pb-8 sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32">
+                <main class="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
+                    <div class="sm:text-center lg:text-left">
+                        <h1 class="text-4xl tracking-tight font-extrabold text-white sm:text-5xl md:text-6xl flex items-center gap-4">
+                            <span class="block">{% trans "Bem-vindo ao" %}</span>
+                        </h1>
+                        <h2 class="text-4xl sm:text-5xl md:text-6xl text-indigo-200 mt-2">NBSocial</h2>
+                        <p class="mt-3 text-base text-gray-100 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
+                            {% trans "Conecte-se com amigos, compartilhe momentos e descubra novidades." %}
+                        </p>
+                        <div class="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
+                            <div class="rounded-md shadow">
+                                <a href="{% url 'account_signup' %}"
+                                   class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-blue-700 bg-white hover:bg-gray-50 md:py-4 md:text-lg md:px-10">
+                                    {% trans "Criar Conta" %}
+                                </a>
+                            </div>
+                            <div class="mt-3 sm:mt-0 sm:ml-3">
+                                <a href="{% url 'account_login' %}"
+                                   class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-500 hover:bg-blue-600 md:py-4 md:text-lg md:px-10">
+                                    {% trans "Entrar" %}
+                                </a>
+                            </div>
+                        </div>
                     </div>
-                {% endif %}
-                <div class="ml-4">
-                    <h2 class="text-xl font-bold text-gray-900">{{ user.get_full_name }}</h2>
-                    <p class="text-sm text-gray-500">@{{ user.username }}</p>
-                </div>
-            </div>
-            <div class="mt-6 grid grid-cols-3 gap-4 text-center">
-                <div>
-                    <p class="text-2xl font-bold text-gray-900">{{ user.posts.count }}</p>
-                    <p class="text-sm text-gray-500">{% trans "Posts" %}</p>
-                </div>
-                <div>
-                    <p class="text-2xl font-bold text-gray-900">{{ user.follower_relationships.count }}</p>
-                    <p class="text-sm text-gray-500">{% trans "Seguidores" %}</p>
-                </div>
-                <div>
-                    <p class="text-2xl font-bold text-gray-900">{{ user.following_relationships.count }}</p>
-                    <p class="text-sm text-gray-500">{% trans "Seguindo" %}</p>
-                </div>
+                </main>
             </div>
         </div>
     </div>
-
-    <!-- Feed de posts -->
-    <div class="md:col-span-2">
-        {% for post in posts %}
-            <div class="bg-white shadow rounded-lg mb-6">
-                <div class="p-6">
-                    <div class="flex items-center">
-                        {% if post.author.avatar %}
-                            <img class="h-10 w-10 rounded-full" src="{{ post.author.avatar.url }}" alt="{{ post.author.username }}">
-                        {% else %}
-                            <div class="h-10 w-10 rounded-full bg-primary text-white flex items-center justify-center">
-                                {{ post.author.username|make_list|first|upper }}
-                            </div>
-                        {% endif %}
-                        <div class="ml-4">
-                            <h3 class="text-lg font-bold text-gray-900">{{ post.author.get_full_name }}</h3>
-                            <p class="text-sm text-gray-500">{{ post.created_at|timesince }}</p>
-                        </div>
-                    </div>
-                    <p class="mt-4 text-gray-900">{{ post.content }}</p>
-                    {% if post.image %}
-                        <img src="{{ post.image.url }}" alt="Post image" class="mt-4 rounded-lg w-full">
-                    {% endif %}
-                    <div class="mt-6 flex items-center justify-between">
-                        <div class="flex items-center space-x-4">
-                            <button class="flex items-center text-gray-500 hover:text-primary">
-                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                                </svg>
-                                <span class="ml-2">{{ post.likes.count }}</span>
-                            </button>
-                            <button class="flex items-center text-gray-500 hover:text-primary">
-                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-                                </svg>
-                                <span class="ml-2">{{ post.comments.count }}</span>
-                            </button>
-                        </div>
-                        {% if user == post.author or user.is_moderator %}
-                            <div class="relative" x-data="{ open: false }">
-                                <button @click="open = !open" class="text-gray-500 hover:text-primary">
-                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
-                                    </svg>
-                                </button>
-                                <div x-show="open" @click.away="open = false" class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5">
-                                    <a href="{% url 'posts:edit' post.pk %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Editar</a>
-                                    <form method="post" action="{% url 'posts:delete' post.pk %}">
-                                        {% csrf_token %}
-                                        <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-gray-100">Excluir</button>
-                                    </form>
+    {% else %}
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <!-- Perfil e navegação -->
+            <div class="lg:col-span-1">
+                <div class="sticky top-4 space-y-4">
+                    <!-- Card do perfil -->
+                    <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+                        <div class="p-6">
+                            <div class="flex items-center space-x-4">
+                                {% if user.avatar %}
+                                <img src="{{ user.avatar.url }}" alt="{{ user.username }}"
+                                     class="h-16 w-16 rounded-full object-cover border-2 border-blue-100">
+                                {% else %}
+                                <div class="h-16 w-16 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center border-2 border-blue-100">
+                                    <span class="text-2xl text-white font-medium">
+                                        {{ user.username|make_list|first|upper }}
+                                    </span>
+                                </div>
+                                {% endif %}
+                                <div>
+                                    <h2 class="text-xl font-bold text-gray-900">{{ user.username }}</h2>
+                                    <p class="text-sm text-gray-500">@{{ user.username }}</p>
                                 </div>
                             </div>
-                        {% endif %}
+                            
+                            <!-- Links de navegação -->
+                            <div class="mt-6 space-y-2">
+                                <a href="{% url 'core:home' %}" class="nav-link block {% if request.resolver_match.view_name == 'core:home' %}nav-link-active{% endif %}">
+                                    <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                                    </svg>
+                                    Início
+                                </a>
+                                <a href="{% url 'users:find_users' %}" class="nav-link block {% if request.resolver_match.view_name == 'users:find_users' %}nav-link-active{% endif %}">
+                                    <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                    </svg>
+                                    Encontrar Pessoas
+                                </a>
+                                <a href="{% url 'account_logout' %}" class="nav-link block text-red-600 hover:text-red-800 hover:bg-red-50">
+                                    <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                    </svg>
+                                    Sair
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        {% empty %}
-            <div class="bg-white shadow rounded-lg p-6 text-center">
-                <p class="text-gray-500">Nenhuma publicação encontrada. Siga outros usuários para ver suas publicações aqui!</p>
+
+            <!-- Feed de Posts -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Criar Post -->
+                <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+                    <div class="p-6">
+                        <form method="post" action="{% url 'posts:create' %}" enctype="multipart/form-data" class="space-y-4">
+                            {% csrf_token %}
+                            <div>
+                                <label for="content" class="sr-only">{% trans "Conteúdo" %}</label>
+                                <textarea id="content" name="content" rows="3"
+                                        class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                        placeholder="{% trans 'O que está acontecendo?' %}"></textarea>
+                            </div>
+                            <div>
+                                <label for="hashtags_text" class="sr-only">{% trans "Hashtags" %}</label>
+                                <input type="text" id="hashtags_text" name="hashtags_text"
+                                       class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                       placeholder="{% trans 'Adicione hashtags (ex: #python #django)' %}">
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-4">
+                                    <label class="cursor-pointer">
+                                        <input type="file" name="image" class="hidden" accept="image/*" id="image-input">
+                                        <svg class="h-6 w-6 text-gray-400 hover:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                    </label>
+                                    <!-- Preview da imagem -->
+                                    <div id="image-preview" class="hidden flex items-center">
+                                        <img src="" alt="Preview" class="h-10 w-10 object-cover rounded">
+                                        <button type="button" id="remove-image" class="ml-2 text-red-500 hover:text-red-700">
+                                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <button type="submit"
+                                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    {% trans "Publicar" %}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Lista de Posts -->
+                {% for post in posts %}
+                <div class="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                    <div class="p-6">
+                        <!-- Cabeçalho do Post -->
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                {% if post.author.avatar %}
+                                <img src="{{ post.author.avatar.url }}" alt="{{ post.author.username }}"
+                                     class="h-10 w-10 rounded-full object-cover">
+                                {% else %}
+                                <div class="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center">
+                                    <span class="text-lg text-white font-medium">
+                                        {{ post.author.username|make_list|first|upper }}
+                                    </span>
+                                </div>
+                                {% endif %}
+                                <div>
+                                    <p class="font-medium text-gray-900">{{ post.author.username }}</p>
+                                    <p class="text-sm text-gray-500">{{ post.created_at|timesince }}</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Menu de opções -->
+                            <div x-data="{ open: false }" class="relative">
+                                <button @click="open = !open" type="button"
+                                        class="text-gray-400 hover:text-gray-600">
+                                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path>
+                                    </svg>
+                                </button>
+                                <div x-show="open" 
+                                     @click.away="open = false"
+                                     x-transition:enter="transition ease-out duration-100"
+                                     x-transition:enter-start="transform opacity-0 scale-95"
+                                     x-transition:enter-end="transform opacity-100 scale-100"
+                                     x-transition:leave="transition ease-in duration-75"
+                                     x-transition:leave-start="transform opacity-100 scale-100"
+                                     x-transition:leave-end="transform opacity-0 scale-95"
+                                     class="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50"
+                                     style="display: none;">
+                                    <div class="py-1" role="menu">
+                                        {% if user == post.author %}
+                                        <form method="post" action="{% url 'posts:delete_post' post.id %}">
+                                            {% csrf_token %}
+                                            <button type="submit"
+                                                    class="block w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-red-100"
+                                                    role="menuitem">
+                                                {% trans "Excluir" %}
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                        <a href="{% url 'posts:detail' post.id %}"
+                                           class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
+                                            {% trans "Ver detalhes" %}
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Conteúdo do Post -->
+                        <div class="mt-4">
+                            {% if post.image %}
+                            <div class="relative" style="max-height: 200px;">
+                                <img src="{{ post.image.url }}" alt="Post image"
+                                     class="w-full rounded-lg object-cover h-[200px]">
+                            </div>
+                            {% endif %}
+                            <p class="mt-3 text-gray-900">{{ post.content }}</p>
+                        </div>
+
+                        <!-- Ações do Post -->
+                        <div class="mt-6 flex items-center justify-between">
+                            {% include "posts/partials/post_likes.html" with post=post %}
+                            
+                            <a href="{% url 'posts:detail' post.id %}" class="flex items-center space-x-2 text-gray-500 hover:text-gray-700">
+                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z">
+                                    </path>
+                                </svg>
+                                <span>{{ post.comments_count }}</span>
+                            </a>
+                            
+                            <!-- Hashtags -->
+                            {% if post.hashtags.exists %}
+                            <div class="flex flex-wrap gap-2">
+                                {% for hashtag in post.hashtags.all %}
+                                <a href="{% url 'posts:hashtag' hashtag.name %}"
+                                   class="text-blue-600 hover:text-blue-800 text-sm">
+                                    #{{ hashtag.name }}
+                                </a>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="bg-white shadow-lg rounded-lg p-6 text-center">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">{% trans "Nenhum post ainda" %}</h3>
+                    <p class="mt-1 text-sm text-gray-500">{% trans "Comece compartilhando algo com seus amigos." %}</p>
+                </div>
+                {% endfor %}
             </div>
-        {% endfor %}
+
+            <!-- Coluna de Tendências -->
+            <div class="lg:col-span-1 space-y-6">
+                {% include "posts/trending_hashtags.html" %}
+            </div>
+        </div>
     </div>
+    {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Alpine.js -->
+<script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Imagem
+        const imageInput = document.getElementById('image-input');
+        const imagePreview = document.getElementById('image-preview');
+        const previewImage = imagePreview.querySelector('img');
+        const removeButton = document.getElementById('remove-image');
+
+        imageInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    imagePreview.classList.remove('hidden');
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        removeButton.addEventListener('click', function() {
+            imageInput.value = '';
+            imagePreview.classList.add('hidden');
+            previewImage.src = '';
+        });
+
+        // Hashtags
+        const contentInput = document.getElementById('content');
+        const hashtagsInput = document.getElementById('hashtags_text');
+
+        contentInput.addEventListener('input', function() {
+            // Extrai hashtags do conteúdo
+            const hashtags = this.value.match(/#\w+/g) || [];
+            // Atualiza o campo de hashtags
+            hashtagsInput.value = hashtags.join(' ');
+        });
+
+        hashtagsInput.addEventListener('input', function() {
+            const value = this.value;
+            // Adiciona # se necessário
+            if (value && !value.startsWith('#')) {
+                this.value = '#' + value;
+            }
+            // Substitui espaços por # quando necessário
+            this.value = this.value.replace(/\s+/g, ' ').replace(/\s#/g, ' #').replace(/([^#\s])\s/g, '$1 #');
+        });
+    });
+</script>
 {% endblock %}

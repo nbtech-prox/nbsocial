@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="{% static 'favicon.svg' %}">
     <title>NBSocial - {% block title %}{% endblock %}</title>
     
     <!-- Tailwind CSS -->
@@ -75,7 +76,7 @@
 
     <main class="max-w-7xl mx-auto py-6 px-4">
         {% if messages %}
-        <div class="mb-8">
+        <div class="mb-8 message-container">
             {% for message in messages %}
             <div class="rounded-md p-4 {% if message.tags == 'error' %}bg-red-50 text-red-700{% else %}bg-green-50 text-green-700{% endif %}">
                 {{ message }}
@@ -84,63 +85,7 @@
         </div>
         {% endif %}
 
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            <!-- Conteúdo principal -->
-            <div class="lg:col-span-3">
-                {% block content %}{% endblock %}
-            </div>
-
-            <!-- Sidebar direita -->
-            <div class="hidden lg:block lg:col-span-1">
-                <div class="sticky top-4">
-                    <!-- Perfil do usuário -->
-                    {% if user.is_authenticated %}
-                    <div class="bg-white rounded-lg shadow p-4 mb-6">
-                        <div class="flex items-center space-x-3">
-                            {% if user.avatar %}
-                                <img class="h-12 w-12 rounded-full object-cover" 
-                                     src="{{ user.avatar.url }}" 
-                                     alt="{{ user.username }}">
-                            {% else %}
-                                <div class="h-12 w-12 rounded-full bg-primary flex items-center justify-center text-white text-xl font-bold">
-                                    {{ user.username.0|upper }}
-                                </div>
-                            {% endif %}
-                            <div>
-                                <h3 class="font-medium">{{ user.username }}</h3>
-                                <a href="{% url 'users:profile' user.username %}" class="text-sm text-gray-500 hover:text-primary">Ver perfil</a>
-                            </div>
-                        </div>
-                        
-                        <!-- Links de navegação -->
-                        <div class="mt-6 space-y-2">
-                            <a href="{% url 'core:home' %}" class="nav-link block {% if request.resolver_match.view_name == 'core:home' %}nav-link-active{% endif %}">
-                                <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-                                </svg>
-                                Início
-                            </a>
-                            <a href="{% url 'users:find_users' %}" class="nav-link block {% if request.resolver_match.view_name == 'users:find_users' %}nav-link-active{% endif %}">
-                                <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                </svg>
-                                Encontrar Pessoas
-                            </a>
-                            <a href="{% url 'account_logout' %}" class="nav-link block text-red-600 hover:text-red-800 hover:bg-red-50">
-                                <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                                </svg>
-                                Sair
-                            </a>
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    <!-- Hashtags em tendência -->
-                    {% include "posts/trending_hashtags.html" %}
-                </div>
-            </div>
-        </div>
+        {% block content %}{% endblock %}
     </main>
 
     <footer class="bg-white mt-12">
@@ -149,6 +94,7 @@
         </div>
     </footer>
     {% block extra_js %}{% endblock %}
+    <script src="{% static 'js/messages.js' %}"></script>
     <script src="{% static 'posts/js/post_detail.js' %}"></script>
 </body>
 </html>

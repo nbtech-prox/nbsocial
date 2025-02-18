@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .globe {
+      fill: none;
+      stroke: white;
+      stroke-width: 2;
+      stroke-opacity: 0.2;
+    }
+  </style>
+  <circle class="globe" cx="200" cy="200" r="190"/>
+  <ellipse class="globe" cx="200" cy="200" rx="190" ry="70"/>
+  <ellipse class="globe" cx="200" cy="200" rx="190" ry="70" transform="rotate(60 200 200)"/>
+  <ellipse class="globe" cx="200" cy="200" rx="190" ry="70" transform="rotate(-60 200 200)"/>
+</svg>

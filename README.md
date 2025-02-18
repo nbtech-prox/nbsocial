@@ -16,7 +16,7 @@
 ## Overview
 NBSocial is a modern social networking platform built with Django, offering a rich set of features for user interaction and content sharing. The platform focuses on providing a seamless user experience with real-time updates and responsive design.
 
-## 🚀 Features
+## Features
 - **User Management**
   - Custom user profiles with avatars
   - Bio and personal information

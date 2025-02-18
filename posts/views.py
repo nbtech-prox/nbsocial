@@ -73,8 +73,15 @@ def create_post(request):
             post = form.save(commit=False)
             post.author = request.user
             post.save()
+            
+            # Processa hashtags após salvar o post
+            post.process_hashtags()
+            
             messages.success(request, _('Publicação criada com sucesso.'))
-            return redirect('posts:detail', pk=post.pk)
+            return redirect('core:home')
+        else:
+            messages.error(request, _('Erro ao criar publicação. Por favor, verifique os dados.'))
+            return redirect('core:home')
     else:
         form = PostForm()
     
@@ -144,23 +151,27 @@ def delete_comment(request, pk):
     return redirect('posts:detail', pk=post_pk)
 
 @login_required
-def like_post(request, pk):
-    """Adicionar/remover like em um post"""
-    if request.method == 'POST':
-        post = get_object_or_404(Post, pk=pk)
-        like, created = Like.objects.get_or_create(user=request.user, post=post)
-        
-        if not created:
-            like.delete()
-            liked = False
-        else:
-            liked = True
-        
-        return JsonResponse({
-            'liked': liked,
-            'likes_count': post.likes.count()
-        })
-    return JsonResponse({'error': 'Método não permitido'}, status=405)
+def like_post(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    user = request.user
+    
+    # Toggle like
+    if post.likes.filter(id=user.id).exists():
+        post.likes.remove(user)
+        post.liked_by_user = False
+    else:
+        post.likes.add(user)
+        post.liked_by_user = True
+    
+    # Atualiza o contador de likes
+    post.likes_count = post.likes.count()
+    
+    # Se for uma requisição HTMX, retorna o partial atualizado
+    if request.headers.get('HX-Request'):
+        return render(request, 'posts/partials/post_likes.html', {'post': post})
+    
+    # Se não for HTMX, redireciona de volta
+    return redirect('posts:detail', post_id=post.id)
 
 @login_required
 def report_content(request, pk):
