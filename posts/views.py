@@ -1,25 +1,33 @@
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.http import JsonResponse
 from django.utils.translation import gettext as _
-from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-from .models import Post, Comment, Like, Report
-from .forms import PostForm, CommentForm, ReportForm
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q, Count
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 from django.contrib.auth import get_user_model
 from django.utils import timezone
-from django.db import models
+from .models import Post, Comment, Like, Report
+from .forms import PostForm, CommentForm, ReportForm
 from hashtags.models import Hashtag
+
+User = get_user_model()
 
 @login_required
 def post_list(request):
-    """Lista de posts com paginação"""
-    posts_list = Post.objects.select_related('author').prefetch_related(
-        'likes', 
+    posts_list = Post.objects.select_related(
+        'author'
+    ).prefetch_related(
+        'likes',
         'comments',
         'hashtags'
     ).order_by('-created_at')
+    
+    # Marca os posts que o usuário atual curtiu
+    for post in posts_list:
+        post.liked_by_user = Like.objects.filter(user=request.user, post=post).exists()
+        post.likes_count = post.likes.count()
     
     paginator = Paginator(posts_list, 10)  # 10 posts por página
     page = request.GET.get('page', 1)
@@ -31,38 +39,37 @@ def post_list(request):
     except EmptyPage:
         posts = paginator.page(paginator.num_pages)
     
-    return render(request, 'posts/post_list.html', {
+    context = {
         'posts': posts,
-        'page_range': paginator.get_elided_page_range(
-            posts.number, 
-            on_each_side=2, 
-            on_ends=1
-        )
-    })
+    }
+    return render(request, 'core/home.html', context)
 
 @login_required
 def post_detail(request, pk):
-    """Detalhes de um post específico"""
-    post = get_object_or_404(Post.objects.select_related('author').prefetch_related('hashtags'), pk=pk)
-    comments = post.comments.select_related('author').all()
+    post = get_object_or_404(Post.objects.prefetch_related('comments', 'likes', 'hashtags'), pk=pk)
+    post.liked_by_user = Like.objects.filter(user=request.user, post=post).exists()
+    post.likes_count = post.likes.count()
+    
+    comments = post.comments.select_related('author').order_by('created_at')
     
     if request.method == 'POST':
-        form = CommentForm(request.POST)
-        if form.is_valid():
-            comment = form.save(commit=False)
+        comment_form = CommentForm(request.POST)
+        if comment_form.is_valid():
+            comment = comment_form.save(commit=False)
             comment.post = post
             comment.author = request.user
             comment.save()
-            messages.success(request, _('Comentário adicionado com sucesso.'))
+            messages.success(request, _('Comentário adicionado com sucesso!'))
             return redirect('posts:detail', pk=post.pk)
     else:
-        form = CommentForm()
+        comment_form = CommentForm()
     
-    return render(request, 'posts/post_detail.html', {
+    context = {
         'post': post,
         'comments': comments,
-        'form': form
-    })
+        'comment_form': comment_form,
+    }
+    return render(request, 'posts/post_detail.html', context)
 
 @login_required
 def create_post(request):
@@ -123,55 +130,65 @@ def delete_post(request, pk):
 
 @login_required
 def add_comment(request, pk):
-    """Adicionar comentário em um post"""
     post = get_object_or_404(Post, pk=pk)
     if request.method == 'POST':
-        form = CommentForm(request.POST)
-        if form.is_valid():
-            comment = form.save(commit=False)
-            comment.post = post
-            comment.author = request.user
-            comment.save()
+        content = request.POST.get('content')
+        if content:
+            comment = Comment.objects.create(
+                post=post,
+                author=request.user,
+                content=content
+            )
             messages.success(request, _('Comentário adicionado com sucesso!'))
-            return redirect('posts:detail', pk=pk)
-    return redirect('posts:detail', pk=pk)
+            return redirect('posts:detail', pk=post.pk)
+    return redirect('posts:detail', pk=post.pk)
 
 @login_required
 def delete_comment(request, pk):
-    """Excluir comentário"""
     comment = get_object_or_404(Comment, pk=pk)
-    if request.user != comment.author:
-        messages.error(request, _('Você não tem permissão para excluir este comentário.'))
-        return redirect('posts:detail', pk=comment.post.pk)
-    
-    post_pk = comment.post.pk
-    if request.method == 'POST':
+    if request.user == comment.author:
+        post_pk = comment.post.pk
         comment.delete()
         messages.success(request, _('Comentário excluído com sucesso!'))
-    return redirect('posts:detail', pk=post_pk)
+        return redirect('posts:detail', pk=post_pk)
+    messages.error(request, _('Você não tem permissão para excluir este comentário.'))
+    return redirect('posts:detail', pk=comment.post.pk)
 
+@require_POST
 @login_required
 def like_post(request, post_id):
+    try:
+        post = get_object_or_404(Post, id=post_id)
+        like = Like.objects.filter(user=request.user, post=post).first()
+
+        if like:
+            like.delete()
+            post.liked_by_user = False
+        else:
+            Like.objects.create(user=request.user, post=post)
+            post.liked_by_user = True
+        
+        # Atualiza o contador de likes
+        post.likes_count = post.likes.count()
+        
+        return render(request, 'posts/partials/post_likes.html', {'post': post})
+    except Exception as e:
+        print(f"Error in like_post: {str(e)}")
+        raise
+
+@require_POST
+@login_required
+def unlike_post(request, post_id):
     post = get_object_or_404(Post, id=post_id)
     user = request.user
     
-    # Toggle like
+    # Remove o like se existir
     if post.likes.filter(id=user.id).exists():
         post.likes.remove(user)
         post.liked_by_user = False
-    else:
-        post.likes.add(user)
-        post.liked_by_user = True
+        post.likes_count = post.likes.count()
     
-    # Atualiza o contador de likes
-    post.likes_count = post.likes.count()
-    
-    # Se for uma requisição HTMX, retorna o partial atualizado
-    if request.headers.get('HX-Request'):
-        return render(request, 'posts/partials/post_likes.html', {'post': post})
-    
-    # Se não for HTMX, redireciona de volta
-    return redirect('posts:detail', post_id=post.id)
+    return render(request, 'posts/partials/post_likes.html', {'post': post})
 
 @login_required
 def report_content(request, pk):
@@ -222,9 +239,13 @@ def resolve_report(request, pk):
 
 @login_required
 def hashtag_posts(request, hashtag_name):
-    """Lista posts com uma hashtag específica"""
     hashtag = get_object_or_404(Hashtag, name=hashtag_name.lower())
     posts = Post.objects.filter(hashtags=hashtag).select_related('author').prefetch_related('likes', 'comments')
+    
+    # Marca os posts que o usuário atual curtiu
+    for post in posts:
+        post.liked_by_user = Like.objects.filter(user=request.user, post=post).exists()
+        post.likes_count = post.likes.count()
     
     paginator = Paginator(posts, 10)
     page = request.GET.get('page', 1)
@@ -236,15 +257,11 @@ def hashtag_posts(request, hashtag_name):
     except EmptyPage:
         posts = paginator.page(paginator.num_pages)
     
-    return render(request, 'posts/hashtag_posts.html', {
+    context = {
         'hashtag': hashtag,
         'posts': posts,
-        'page_range': paginator.get_elided_page_range(
-            posts.number,
-            on_each_side=2,
-            on_ends=1
-        )
-    })
+    }
+    return render(request, 'posts/hashtag_posts.html', context)
 
 @login_required
 def search(request):
@@ -264,6 +281,11 @@ def search(request):
             'comments',
             'hashtags'
         ).order_by('-created_at')
+        
+        # Marca os posts que o usuário atual curtiu
+        for post in posts:
+            post.liked_by_user = Like.objects.filter(user=request.user, post=post).exists()
+            post.likes_count = post.likes.count()
         
         # Pesquisa hashtags
         if query.startswith('#'):

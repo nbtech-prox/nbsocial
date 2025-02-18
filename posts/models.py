@@ -72,6 +72,36 @@ class Post(models.Model):
         mention_matches = mention_pattern.finditer(self.content)
         return {match.group(1) for match in mention_matches}
 
+    @property
+    def liked_by_user(self):
+        """Verifica se o post foi curtido pelo usuário atual"""
+        return hasattr(self, '_liked_by_user') and self._liked_by_user
+
+    @liked_by_user.setter
+    def liked_by_user(self, value):
+        """Define se o post foi curtido pelo usuário atual"""
+        self._liked_by_user = value
+
+    @property
+    def likes_count(self):
+        """Retorna o número de curtidas do post"""
+        return self.likes.count()
+    
+    @likes_count.setter
+    def likes_count(self, value):
+        """Define o número de curtidas do post (apenas para compatibilidade)"""
+        pass  # Não faz nada, apenas para evitar o erro
+
+    @property
+    def comments_count(self):
+        """Retorna o número de comentários do post"""
+        return self.comments.count()
+    
+    @comments_count.setter
+    def comments_count(self, value):
+        """Define o número de comentários do post (apenas para compatibilidade)"""
+        pass  # Não faz nada, apenas para evitar o erro
+
 class Comment(models.Model):
     """Modelo para comentários em posts"""
     
