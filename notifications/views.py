@@ -13,8 +13,11 @@ def notification_list(request):
         .order_by('-created_at')
     )
     
+    unread_count = notifications.filter(read=False).count()
+    
     return render(request, 'notifications/notification_list.html', {
-        'notifications': notifications
+        'notifications': notifications,
+        'unread_count': unread_count
     })
 
 @login_required
@@ -23,8 +26,8 @@ def mark_all_as_read(request):
     if request.method == 'POST':
         Notification.objects.filter(
             recipient=request.user,
-            is_read=False
-        ).update(is_read=True)
+            read=False
+        ).update(read=True)
         return JsonResponse({'status': 'success'})
     return JsonResponse({'status': 'error'}, status=400)
 
@@ -33,6 +36,6 @@ def get_unread_count(request):
     """Retorna o número de notificações não lidas"""
     count = Notification.objects.filter(
         recipient=request.user,
-        is_read=False
+        read=False
     ).count()
     return JsonResponse({'count': count})

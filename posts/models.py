@@ -4,6 +4,8 @@ from django.utils.translation import gettext_lazy as _
 from django.urls import reverse
 import re
 from hashtags.models import Hashtag
+from django.utils import timezone
+from django.contrib.auth import get_user_model
 
 class Post(models.Model):
     """Modelo para posts da rede social"""
@@ -57,21 +59,51 @@ class Post(models.Model):
         hashtag_pattern = re.compile(r'#(\w+)')
         hashtag_matches = hashtag_pattern.finditer(self.content)
         
+        # Lista para armazenar hashtags processadas neste ciclo
+        processed_hashtags = []
+        
         # Para cada hashtag encontrada
         for match in hashtag_matches:
-            hashtag_name = match.group(1)
-            if hashtag_name:
-                # Cria ou obtém a hashtag
-                hashtag, _ = Hashtag.objects.get_or_create(name=hashtag_name)
-                # Adiciona ao post
-                self.hashtags.add(hashtag)
+            hashtag_name = match.group(1).lower()  # Converter para minúsculas para normalização
+            
+            # Evitar processamento de hashtags duplicadas na mesma postagem
+            if hashtag_name in processed_hashtags:
+                continue
+                
+            processed_hashtags.append(hashtag_name)
+            
+            # Obter ou criar a hashtag
+            hashtag, created = Hashtag.objects.get_or_create(name=hashtag_name)
+            
+            # Adicionar a hashtag ao post
+            self.hashtags.add(hashtag)
+            
+            # Atualizar last_used
+            hashtag.last_used = timezone.now()
+            hashtag.save(update_fields=['last_used'])
+            
+            # Atualizar status de tendência
+            hashtag.update_trending_status()
     
     def extract_mentions(self):
-        """Extrai menções (@username) do conteúdo do post"""
+        """Extrai menções (@username) do conteúdo do post e retorna a lista de usernames"""
+        # Extrair menções usando regex
         mention_pattern = re.compile(r'@(\w+)')
         mention_matches = mention_pattern.finditer(self.content)
-        return {match.group(1) for match in mention_matches}
-
+        
+        # Lista para armazenar os usernames mencionados
+        mentioned_usernames = []
+        
+        # Para cada menção encontrada
+        for match in mention_matches:
+            username = match.group(1)
+            
+            # Evitar duplicatas
+            if username not in mentioned_usernames:
+                mentioned_usernames.append(username)
+                
+        return mentioned_usernames
+    
     @property
     def liked_by_user(self):
         """Verifica se o post foi curtido pelo usuário atual"""
@@ -158,6 +190,7 @@ class Hashtag(models.Model):
     """Modelo para hashtags"""
     name = models.CharField(_('nome'), max_length=100, unique=True)
     created_at = models.DateTimeField(_('criado em'), auto_now_add=True)
+    last_used = models.DateTimeField(_('última vez usada'), null=True, blank=True)
     
     class Meta:
         verbose_name = _('hashtag')
@@ -170,6 +203,10 @@ class Hashtag(models.Model):
     @property
     def post_count(self):
         return self.posts.count()
+
+    def update_trending_status(self):
+        # Implementação para atualizar o status de tendência da hashtag
+        pass
 
 class Report(models.Model):
     """Modelo para denúncias de conteúdo"""

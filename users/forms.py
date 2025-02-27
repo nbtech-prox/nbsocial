@@ -25,6 +25,19 @@ class CustomSignupForm(SignupForm):
         })
     )
     
+    def clean_email(self):
+        """
+        Validação personalizada para o campo de email.
+        Verifica se o email já está em uso de forma mais amigável.
+        """
+        email = self.cleaned_data.get('email')
+        if email and CustomUser.objects.filter(email=email).exists():
+            raise forms.ValidationError(
+                _('Este e-mail já está em uso. Por favor, use outro endereço de e-mail ou faça login na sua conta existente.'),
+                code='email_already_exists'
+            )
+        return email
+    
     def save(self, request):
         user = super().save(request)
         user.first_name = self.cleaned_data['first_name']

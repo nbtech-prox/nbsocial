@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Notificações{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6">Notificações</h1>
+    
+    <div class="flex justify-between items-center mb-4">
+        <p class="text-gray-600">
+            {% if unread_count > 0 %}
+                {{ unread_count }} notificações não lidas
+            {% else %}
+                Todas as notificações foram lidas
+            {% endif %}
+        </p>
+        
+        <form method="post" action="{% url 'notifications:mark_all_read' %}" class="inline">
+            {% csrf_token %}
+            <button type="submit" class="text-blue-600 hover:text-blue-800 underline text-sm">
+                Marcar todas como lidas
+            </button>
+        </form>
+    </div>
+    
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+        {% if notifications %}
+            <div class="divide-y divide-gray-200">
+                {% for notification in notifications %}
+                    <div class="p-4 {% if not notification.read %}bg-blue-50{% endif %}">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0 mr-4">
+                                {% if notification.sender.avatar %}
+                                    <img src="{{ notification.sender.avatar.url }}" alt="{{ notification.sender.username }}" class="w-10 h-10 rounded-full">
+                                {% else %}
+                                    <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white">
+                                        {{ notification.sender.username|first|upper }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="flex-grow">
+                                <div class="flex justify-between">
+                                    <a href="{% url 'users:profile' username=notification.sender.username %}" class="font-medium text-gray-900 hover:underline">
+                                        {{ notification.sender.username }}
+                                    </a>
+                                    <span class="text-sm text-gray-500">{{ notification.created_at|date:"d/m/Y H:i" }}</span>
+                                </div>
+                                
+                                <p class="text-gray-800 mt-1">
+                                    {% if notification.notification_type == 'like' %}
+                                        gostou da sua <a href="{% url 'posts:detail' pk=notification.post.pk %}" class="text-blue-600 hover:underline">publicação</a>.
+                                    {% elif notification.notification_type == 'comment' %}
+                                        comentou na sua <a href="{% url 'posts:detail' pk=notification.post.pk %}" class="text-blue-600 hover:underline">publicação</a>.
+                                    {% elif notification.notification_type == 'follow' %}
+                                        começou a seguir-te.
+                                    {% elif notification.notification_type == 'mention' %}
+                                        mencionou-te numa <a href="{% url 'posts:detail' pk=notification.post.pk %}" class="text-blue-600 hover:underline">publicação</a>.
+                                    {% endif %}
+                                </p>
+                                
+                                {% if notification.post and notification.post.content %}
+                                    <div class="mt-2 p-3 bg-gray-100 rounded-md text-sm text-gray-700">
+                                        {{ notification.post.content|truncatechars:100 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="p-8 text-center text-gray-500">
+                <p>Não tens notificações ainda.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -77,6 +77,36 @@
                     {% if user.is_authenticated %}
                         <a href="{% url 'core:explore' %}" class="nav-link">Explorar</a>
                         <a href="{% url 'posts:create' %}" class="btn-primary">Nova Publicação</a>
+                        
+                        <!-- Dropdown de Notificações -->
+                        <div class="relative" x-data="{ open: false }">
+                            <button @click="open = !open" class="nav-link flex items-center relative">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                                </svg>
+                                <span id="notification-badge" class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-500 rounded-full {% if not unread_notifications_count %}hidden{% endif %}">
+                                    {% if unread_notifications_count %}
+                                        {{ unread_notifications_count }}
+                                    {% endif %}
+                                </span>
+                            </button>
+                            
+                            <!-- Dropdown de Notificações -->
+                            <div id="notification-dropdown" x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg overflow-hidden z-20" style="display: none;">
+                                <div class="py-2 px-4 bg-primary text-white flex justify-between items-center">
+                                    <h3 class="text-sm font-medium">Notificações</h3>
+                                    <button id="mark-all-read" class="text-xs hover:underline">Marcar todas como lidas</button>
+                                </div>
+                                <div id="notification-list" class="max-h-96 overflow-y-auto divide-y divide-gray-100">
+                                    <!-- As notificações serão carregadas aqui via JavaScript -->
+                                    <div class="p-4 text-center text-gray-500">A carregar notificações...</div>
+                                </div>
+                                <a href="{% url 'notifications:list' %}" class="block py-2 text-sm text-center text-primary hover:bg-blue-50 transition">
+                                    Ver todas as notificações
+                                </a>
+                            </div>
+                        </div>
+                        
                         <a href="{% url 'users:profile_edit' %}" class="nav-link flex items-center">
                             <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
@@ -111,8 +141,13 @@
             <p class="text-center text-gray-500">&copy; {% now "Y" %} NBSocial</p>
         </div>
     </footer>
+    
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.2/dist/cdn.min.js"></script>
+    
     {% block extra_js %}{% endblock %}
     <script src="{% static 'js/messages.js' %}"></script>
+    <script src="{% static 'js/notifications.js' %}"></script>
     <script src="{% static 'posts/js/post_detail.js' %}"></script>
 </body>
 </html>

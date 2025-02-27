@@ -56,7 +56,33 @@ class Notification(models.Model):
         verbose_name_plural = _('notificações')
 
     def __str__(self):
-        return f'{self.get_notification_type_display()} - {self.recipient.username}'
+        return f'{self.notification_type} para {self.recipient.username} de {self.sender.username}'
+
+    def get_notification_text(self):
+        """Retorna texto específico para cada tipo de notificação"""
+        if self.notification_type == 'like':
+            return _('Gostou da sua publicação')
+        elif self.notification_type == 'comment':
+            return _('Comentou na sua publicação')
+        elif self.notification_type == 'follow':
+            return _('Começou a seguir-te')
+        elif self.notification_type == 'mention':
+            return _('Mencionou-te numa publicação')
+        else:
+            return _('Nova notificação')
+
+    def get_notification_url(self):
+        """Retorna URL para a ação que gerou a notificação"""
+        from django.urls import reverse
+        
+        if self.notification_type in ['like', 'comment'] and self.post:
+            return reverse('posts:detail', kwargs={'pk': self.post.pk})
+        elif self.notification_type == 'follow':
+            return reverse('users:profile', kwargs={'username': self.sender.username})
+        elif self.notification_type == 'mention' and self.post:
+            return reverse('posts:detail', kwargs={'pk': self.post.pk})
+        else:
+            return '#'
 
     def mark_as_read(self):
         """Marca a notificação como lida"""
